@@ -1,0 +1,66 @@
+---
+environments:
+  training-env:
+    python_packages:
+      - torch
+      - pytorch-lightning
+      - numpy
+      - Pillow
+      - torchvision
+      - pydantic
+  inference-env:
+    python_packages:
+      - torch
+      - kserve
+      - torchvision
+      - pillow
+      - numpy
+      - pydantic
+    apt_packages: []
+  app-env:
+    python_version: '3.10'
+    python_packages:
+      - gradio
+      - uvicorn
+      - fastapi
+      - slingshot-ai
+      - pillow
+    apt_packages: []
+runs:
+  - name: create-dataset-artifact
+    machine_size: SMALL
+    cmd: python data.py
+    environment: training-env
+    mounts:
+      - path: /mnt/output
+        mode: UPLOAD
+        tag: mnist-dataset
+  - name: train-model
+    machine_size: SMALL
+    cmd: python train.py
+    environment: training-env
+    mounts:
+      - path: /mnt/dataset
+        mode: DOWNLOAD
+        tag: mnist-dataset
+      - path: /mnt/output
+        mode: UPLOAD
+        tag: mnist-model
+deployments:
+  - name: classifier-deployment
+    cmd: python inference.py
+    environment: inference-env
+    machine_size: SMALL
+    mounts:
+      - path: /mnt/model
+        mode: DOWNLOAD
+        tag: mnist-model
+apps:
+  - name: draw-mnist
+    environment: app-env
+    machine_size: SMALL
+    config_variables: {}
+    mounts: []
+    service_account: false
+    port: 8080
+    cmd: uvicorn app:app --port 8080 --host 0.0.0.0
