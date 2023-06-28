@@ -20,6 +20,7 @@ recognises digits in the form of images.
       ```
    
    * Otherwise, instead use `slingshot init` which will guide you to link the folder to a new project.
+     (If it asks about initializing a project from scratch, enter `y` to confirm)
 
 0. Push the source code to your project and apply the `slingshot.yaml`:
     ```bash
@@ -32,8 +33,12 @@ recognises digits in the form of images.
     Detected new run 'create-dataset-artifact '
     Detected new run 'train-model'
     Detected new deployment 'classifier-deployment'
+    ```
 
-    Do you want to apply these changes? [Y/n]: Y
+    If it asks you if you want to apply, enter `y` to confirm:
+
+    ```bash
+    Do you want to apply these changes? [Y/n]: y
     Applying 'slingshot.yaml' for project 'mnist-example'.
     Creating environment 'training-env'...✅
     Creating environment 'inference-env'...✅
