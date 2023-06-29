@@ -19,7 +19,7 @@ async def predict_digit(img) -> int:  # TODO Type input (it's a numpy array)
     img.save(img_bytes, format='PNG')
     img_bytes = img_bytes.getvalue()
     resp = await sdk.predict(deployment_name=DEPLOYMENT_NAME, example_bytes=img_bytes)
-    if "prediction" not in resp["data"]:
+    if "prediction" not in resp:
         raise Exception(f"Error running inference: {resp}")
 
     digit_pred = resp["prediction"]
