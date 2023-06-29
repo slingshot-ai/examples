@@ -6,7 +6,6 @@ from PIL import Image
 
 from slingshot import SlingshotSDK
 
-PROJECT_NAME = "example-mnist"
 DEPLOYMENT_NAME = "classifier-deployment"
 
 app = FastAPI()
@@ -19,12 +18,11 @@ async def predict_digit(img) -> int:  # TODO Type input (it's a numpy array)
     img = Image.fromarray(img)
     img.save(img_bytes, format='PNG')
     img_bytes = img_bytes.getvalue()
-    await sdk.use_project(PROJECT_NAME)
     resp = await sdk.predict(deployment_name=DEPLOYMENT_NAME, example_bytes=img_bytes)
-    if "data" not in resp or "prediction" not in resp["data"]:
+    if "prediction" not in resp["data"]:
         raise Exception(f"Error running inference: {resp}")
 
-    digit_pred = resp["data"]["prediction"]
+    digit_pred = resp["prediction"]
     return digit_pred
 
 
