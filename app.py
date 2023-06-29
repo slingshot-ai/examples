@@ -1,3 +1,5 @@
+import io
+
 import gradio as gr
 from fastapi import FastAPI
 from PIL import Image
@@ -13,7 +15,9 @@ sdk = SlingshotSDK()
 
 async def predict_digit(img: Image) -> int:
     # Get the bytes from the image
-    img_bytes = img.tobytes()
+    img_bytes = io.BytesIO()
+    img.save(img_bytes, format='PNG')
+    img_bytes = img_bytes.getvalue()
     await sdk.use_project(PROJECT_NAME)
     resp = await sdk.predict(deployment_name=DEPLOYMENT_NAME, example_bytes=img_bytes)
     if "data" not in resp or "prediction" not in resp["data"]:
