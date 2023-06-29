@@ -13,9 +13,10 @@ app = FastAPI()
 sdk = SlingshotSDK()
 
 
-async def predict_digit(img: Image) -> int:
+async def predict_digit(img) -> int:  # TODO Type input (it's a numpy array)
     # Get the bytes from the image
     img_bytes = io.BytesIO()
+    img = Image.fromarray(img)
     img.save(img_bytes, format='PNG')
     img_bytes = img_bytes.getvalue()
     await sdk.use_project(PROJECT_NAME)
