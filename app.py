@@ -1,6 +1,7 @@
 import io
 
 import gradio as gr
+import numpy as np
 from fastapi import FastAPI
 from PIL import Image
 
@@ -12,10 +13,10 @@ app = FastAPI()
 sdk = SlingshotSDK()
 
 
-async def predict_digit(img) -> int:  # TODO Type input (it's a numpy array)
+async def predict_digit(img: np.array) -> int:
     # Get the bytes from the image
-    img_bytes = io.BytesIO()
     img = Image.fromarray(img)
+    img_bytes = io.BytesIO()
     img.save(img_bytes, format='PNG')
     img_bytes = img_bytes.getvalue()
     resp = await sdk.predict(deployment_name=DEPLOYMENT_NAME, example_bytes=img_bytes)

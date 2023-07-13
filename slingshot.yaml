@@ -7,7 +7,6 @@ environments:
       - numpy
       - Pillow
       - torchvision
-      - pydantic
   inference-env:
     python_packages:
       - torch
@@ -15,7 +14,7 @@ environments:
       - torchvision
       - pillow
       - numpy
-      - pydantic
+      - slingshot-ai
     apt_packages: []
   app-env:
     python_version: '3.10'
@@ -48,13 +47,13 @@ runs:
         tag: mnist-model
 deployments:
   - name: classifier-deployment
-    cmd: python inference.py
     environment: inference-env
     machine_size: SMALL
     mounts:
       - path: /mnt/model
         mode: DOWNLOAD
         tag: mnist-model
+    cmd: python inference.py
 apps:
   - name: draw-mnist
     environment: app-env
