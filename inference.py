@@ -39,5 +39,5 @@ class MnistInference(InferenceModel):
 
 
 if __name__ == "__main__":
-    model = MNISTInference()
+    model = MnistInference()
     model.start()

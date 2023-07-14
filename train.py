@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Literal
 
 import pytorch_lightning as pl
 import torch
@@ -17,7 +18,7 @@ class TrainConfig(BaseModel):
     batch_size: int = 256
     num_epochs: int = 2
     learning_rate: float = 0.01
-    loss_fn: str = "cross_entropy"
+    loss_fn: Literal["cross_entropy", "mse"] = "cross_entropy"
 
 
 def save_traced_model(model: nn.Module, save_filename: Path, *, dataset: Dataset) -> Path:
