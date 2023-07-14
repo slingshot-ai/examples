@@ -6,7 +6,7 @@ from slingshot import InferenceModel, Prediction
 from utils import bytes_to_tensor
 
 
-class MNISTInference(InferenceModel):
+class MnistInference(InferenceModel):
     async def load(self) -> None:
         """
         Slingshot will call this method to load the model.
@@ -16,7 +16,7 @@ class MNISTInference(InferenceModel):
         """
         model_path = Path('/mnt/model/model.pt')
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        print(f"Using device: {self.hn_model.device}")
+        print(f"Using device: {self.device}")
         self.model = torch.jit.load(str(model_path)).to(self.device)
         print("Model loaded")
 
