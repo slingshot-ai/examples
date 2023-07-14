@@ -7,10 +7,10 @@ environments:
       - numpy
       - Pillow
       - torchvision
+      - pydantic
   inference-env:
     python_packages:
       - torch
-      - kserve
       - torchvision
       - pillow
       - numpy
