@@ -5,6 +5,7 @@ from typing import Literal
 import pytorch_lightning as pl
 import torch
 import torchvision
+
 from pydantic import BaseModel
 from model import DigitRecognizer
 from torch import nn
@@ -42,7 +43,13 @@ if __name__ == "__main__":
 
     # Load data
     print("Loading data...")
-    train_ds = torchvision.datasets.MNIST(DATASET_PATH)
+    transform = torchvision.transforms.Compose(
+        [
+            torchvision.transforms.ToTensor(),
+            torchvision.transforms.Normalize((0.5,), (0.5,))
+        ]
+    )
+    train_ds = torchvision.datasets.MNIST(DATASET_PATH, transform=transform)
     print(f"Loaded {len(train_ds)} examples")
     train_dataloader = DataLoader(train_ds, batch_size=configs.batch_size)
 
