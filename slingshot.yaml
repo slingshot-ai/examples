@@ -69,4 +69,4 @@ apps:
     service_account: false
     port: 8080
     cmd: uvicorn app:app --port 8080 --host 0.0.0.0
-    attach_project_credentials: false
+    attach_project_credentials: true
