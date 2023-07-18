@@ -4,9 +4,11 @@ import pytorch_lightning as pl
 import torch
 from torch import nn
 
+from utils import preprocess_pil_image
+
 
 class DigitRecognizer(pl.LightningModule):
-    def __init__(self, loss_fn: Union[Literal["cross_entropy", "mse"]], learning_rate: float, num_classes: int = 10):
+    def __init__(self, loss_fn: Literal["cross_entropy", "mse"], learning_rate: float, num_classes: int = 10):
         super().__init__()
         self.save_hyperparameters()
         self.net = nn.Sequential(

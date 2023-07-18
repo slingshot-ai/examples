@@ -1,16 +1,9 @@
 import base64
 from io import BytesIO
 
-import numpy as np
 from PIL import Image, ImageOps
 import torch
-from pydantic import BaseModel
-
-
-class MNISTExample(BaseModel):
-    id: str
-    example: str  # b64 encoded
-    label: str
+from torchvision.transforms.functional import pil_to_tensor
 
 
 def base64_to_tensor(img_data: str):
@@ -18,13 +11,14 @@ def base64_to_tensor(img_data: str):
     return bytes_to_tensor(img_bytes)
 
 
-def bytes_to_tensor(img_data: bytes):
-    with BytesIO(img_data) as b:
-        pil_image = Image.open(b).copy()
+def bytes_to_tensor(img_data: bytes) -> torch.Tensor:
+    """Takes in bytes from an image format recognized by PIL and returns a normalized 28x28 tensor."""
+    pil_image = Image.open(BytesIO(img_data))
+    return preprocess_pil_image(pil_image)
 
+
+def preprocess_pil_image(pil_image: Image.Image) -> torch.Tensor:
+    """Takes in a PIL image and returns a normalized 28x28 tensor."""
     pil_image = ImageOps.grayscale(pil_image)
     pil_image = pil_image.resize((28, 28))
-
-    np_image = np.array(pil_image)
-    im_arr = np_image.reshape((1, 28, 28))
-    return torch.FloatTensor(im_arr / 255)
+    return pil_to_tensor(pil_image).to(float) / 255  # Returns shape (1, 28, 28)
