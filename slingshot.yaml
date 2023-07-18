@@ -10,6 +10,7 @@ environments:
   inference-env:
     python_packages:
       - torch
+      - pytorch-lightning
       - torchvision
       - pillow
       - numpy
@@ -24,6 +25,15 @@ environments:
       - slingshot-ai
       - pillow
     apt_packages: []
+  session-env:
+    python_packages:
+      - jupyterlab>=3.5.0
+      - torch
+      - pytorch-lightning
+      - torchvision
+      - pillow
+      - numpy
+      - slingshot-ai
 runs:
   - name: create-dataset-artifact
     environment: training-env
@@ -69,4 +79,9 @@ apps:
     service_account: false
     port: 8080
     cmd: uvicorn app:app --port 8080 --host 0.0.0.0
+    attach_project_credentials: true
+  - name: session
+    environment: session-env
+    machine_size: CPU_LARGE
+    using: session
     attach_project_credentials: true

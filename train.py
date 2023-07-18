@@ -22,15 +22,6 @@ class TrainConfig(BaseModel):
     loss_fn: Literal["cross_entropy", "mse"] = "cross_entropy"
 
 
-def save_traced_model(model: nn.Module, save_filename: Path, *, dataset: Dataset) -> Path:
-    test_dataloader = DataLoader(dataset, batch_size=512)
-    x, _ = next(iter(test_dataloader))
-    traced = torch.jit.trace(model.net, x)
-    save_filename.parent.mkdir(exist_ok=True)
-    traced.save(save_filename)
-    return save_filename
-
-
 if __name__ == "__main__":
     print("Reading config...")
     configs = TrainConfig.parse_raw(os.environ.get("CONFIG", "{}"))
@@ -55,11 +46,11 @@ if __name__ == "__main__":
 
     # Train model
     print("Training model...")
-    trainer = pl.Trainer(enable_checkpointing=False, accelerator=device, devices=1, max_epochs=configs.num_epochs)
+    trainer = pl.Trainer(default_root_dir=MODEL_DIR_PATH, accelerator=device, devices=1, max_epochs=configs.num_epochs)
     trainer.fit(model=digit_recognizer, train_dataloaders=train_dataloader)
+    # Save the model
     print("Saving model...")
-    model_path = MODEL_DIR_PATH / "model.pt"
-    save_traced_model(digit_recognizer, model_path, dataset=train_ds)
+    trainer.save_checkpoint(MODEL_DIR_PATH / "model.ckpt")
 
     # Evaluate model
     print("Evaluating model...")

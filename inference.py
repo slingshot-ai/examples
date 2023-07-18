@@ -3,7 +3,10 @@ from pathlib import Path
 import torch
 
 from slingshot import InferenceModel, Prediction
+
+from model import DigitRecognizer
 from utils import bytes_to_tensor
+import os
 
 
 class MnistInference(InferenceModel):
@@ -14,10 +17,15 @@ class MnistInference(InferenceModel):
         Implementation example:
             self.model = torch.load("/mnt/model/model.pt")
         """
-        model_path = Path('/mnt/model/model.pt')
+        model_path = Path("/mnt/model/model.ckpt")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
-        self.model = torch.jit.load(str(model_path)).to(self.device)
+        print("Files in model path:", os.listdir("/mnt/model/"))
+        # Check if file exists
+        print("model file exists", model_path.exists())
+
+        self.model = DigitRecognizer.load_from_checkpoint(model_path)
+        print("model device", self.model.device)
         print("Model loaded")
 
     async def predict(self, examples: list[bytes]) -> Prediction | list[Prediction]:
@@ -33,7 +41,10 @@ class MnistInference(InferenceModel):
             example_text = examples[0].decode("utf-8")
             return self.model(example_text)
         """
-        img_example = bytes_to_tensor(examples[0]).to(self.device)
+        img_example = bytes_to_tensor(examples[0]).unsqueeze(0).to(self.device).to(torch.float32)
+        print("image shape", img_example.shape)
+        print("image type", img_example.dtype)
+        print("model type", self.model)
         prob, index = self.model(img_example).squeeze().softmax(0).max(0)
         return {'confidence': prob.item(), 'prediction': str(index.item())}
 
