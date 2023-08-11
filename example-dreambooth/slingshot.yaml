@@ -1,0 +1,131 @@
+---
+environments:
+  run_env:
+    python_version: '3.10'
+    python_packages:
+      - torch
+      - tqdm
+      - torchvision
+      - wandb
+      - wget
+      - diffusers
+      - transformers==4.25.1
+      - accelerate==0.19.0
+      - bitsandbytes
+      - numpy
+      - opencv-contrib-python
+      - pydantic
+      - scikit-image>=0.19
+      - xformers
+    apt_packages: []
+  web-ui:
+    python_version: '3.10'
+    python_packages:
+      - gradio
+      - uvicorn
+      - slingshot-ai
+      - fastapi
+      - pillow
+    apt_packages: []
+  deployment-env:
+    python_version: '3.10'
+    python_packages:
+      - pillow
+      - torch
+      - fastapi
+      - uvicorn
+      - diffusers
+    apt_packages: []
+runs:
+  - name: dream_run_train
+    environment: run_env
+    machine_type: T4
+    num_gpu: 1
+    config_variables:
+      BASE_MODEL_PATH: runwayml/stable-diffusion-v1-5
+      VAE_MODEL_PATH: stabilityai/sd-vae-ft-mse
+      INSTANCE_NAME: DishaniL
+      RESUME_TRAINING: false
+      UNET_TRAINING_STEPS: 1800
+      UNET_LEARNING_RATE: 3e-6
+      TEXT_ENCODER_TRAINING_STEPS: 350
+      TEXT_ENCODER_LEARNING_RATE: 1e-6
+      OFFSET_NOISE: false
+      EXTERNAL_CAPTIONS: false
+      SEED: ''
+      PRECISION: fp16
+      SAVE_CHECKPOINT_EVERY: 500
+
+    mounts:
+      - mode: UPLOAD
+        tag: dreambooth-trained-model-example
+        path: /mnt/dreambooth-trained-model-example
+      - mode: DOWNLOAD
+        path: /mnt/dreambooth_input_data
+        tag: dreambooth_input_data
+      - mode: DOWNLOAD
+        tag: dreambooth-trained-model-example
+        path: /mnt/dreambooth-trained-model-example
+    cmd: python train.py
+    service_account: false
+
+  - name: dream_run_test
+    environment: run_env
+    machine_type: T4
+    num_gpu: 1
+    config_variables:
+      PROMPT: closeup portrait of DishaniL woman with mouth open, highly detailed,
+        science fiction, star wars concept art, intricate details, bright colors,
+        golden hour, art by marko djurdjevic, greg rutkowski, wlop, fredperry, digital
+        painting, rossdraws
+      NEGATIVE_PROMPT: ugly, disfigured face
+      NUM_SAMPLES: 4
+      GUIDANCE_SCALE: 7
+      NUM_INFERENCE_STEPS: 40
+      HEIGHT: 512
+      WIDTH: 512
+
+    mounts:
+      - mode: UPLOAD
+        tag: dreambooth-produced_images
+        path: /mnt/dreambooth-produced_images
+      - mode: DOWNLOAD
+        tag: dreambooth-trained-model-example
+        path: /mnt/dreambooth-trained-model-example
+    cmd: python test.py
+    service_account: false
+  - name: convert-weights
+    environment: web-ui
+    machine_type: CPU_SMALL
+    config_variables: {}
+    mounts:
+      - mode: DOWNLOAD
+        tag: dreambooth-trained-model-example
+        path: /mnt/dreambooth-original
+      - mode: UPLOAD
+        tag: dreambooth-trained-model-ckpt
+        path: /mnt/dreambooth-converted
+    service_account: false
+    cmd: python convert_to_a1111.py --model_path /mnt/dreambooth-original --checkpoint_path
+      /mnt/dreambooth-converted/dreambooth_model.ckpt
+apps:
+  - name: interactive-interface
+    environment: web-ui
+    machine_type: CPU_SMALL
+    config_variables: {}
+    mounts: []
+    service_account: true
+    port: 8080
+    cmd: uvicorn web:app --host 0.0.0.0 --port 8080
+deployments:
+  - name: image-generation
+    environment: deployment-env
+    machine_type: T4
+    num_gpu: 1
+    config_variables: {}
+    mounts:
+      - mode: DOWNLOAD
+        tag: dreambooth-trained-model-example
+        path: /mnt/model
+    service_account: false
+    cmd: python inference.py
