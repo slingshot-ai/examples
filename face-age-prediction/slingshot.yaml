@@ -1,0 +1,114 @@
+---
+environments:
+  training:
+    python_version: '3.10'
+    python_packages:
+      - torch
+      - pytorch-lightning
+      - numpy
+      - Pillow
+      - torchvision
+      - opencv-python-headless
+      - wandb
+      - wget
+      - pretrainedmodels
+      - pydantic
+      - jupyterlab>=3.5.0
+      - pandas
+      - tqdm
+  deployment:
+    python_version: '3.10'
+    python_packages:
+      - numpy
+      - torch
+      - torchvision
+      - opencv-python-headless
+      - pretrainedmodels
+      - slingshot-ai==0.0.17
+  session:
+    python_version: '3.10'
+    python_packages:
+      - jupyterlab>=3.5.0
+      - torch
+      - torchvision
+      - opencv-python
+      - wget
+      - slingshot-ai==0.0.17
+      - gradio
+runs:
+  - name: download-model
+    environment: deployment
+    cmd: python download_model.py
+    mounts:
+      - mode: UPLOAD
+        path: /mnt/face_detector
+        tag: detector_model
+    machine_type: CPU_MEDIUM
+    num_gpu: 0
+  - name: train
+    environment: training
+    machine_type: T4
+    num_gpu: 1
+    cmd: python train.py
+    mounts:
+      - path: /mnt/appa-real-dataset
+        tag: appa-real-dataset
+        mode: DOWNLOAD
+      - path: /mnt/model
+        tag: face-age-prediction-model
+        mode: UPLOAD
+      - path: /mnt/model
+        tag: face-age-prediction-model
+        mode: DOWNLOAD
+    config_variables:
+      img_size: 224
+      optimizer: sgd
+      learning_rate: 1e-5
+      learning_rate_decay_step: 3
+      learning_rate_decay_rate: 0.9
+      weight_decay: 1e-6
+      batch_size: 16
+      epochs: 20
+      resume_path: ''
+      data_dir: /mnt/appa-real-dataset/
+      checkpoint: /mnt/model/
+
+    attach_project_credentials: false
+deployments:
+  - name: face-age-prediction
+    cmd: python inference.py
+    environment: deployment
+    machine_type: T4
+    num_gpu: 1
+    mounts:
+      - path: /mnt/model
+        tag: detector_model
+        mode: DOWNLOAD
+      - path: /mnt/face-age-prediction-model
+        tag: face-age-prediction-model
+        mode: DOWNLOAD
+    attach_project_credentials: false
+apps:
+  - name: session
+    environment: session
+    machine_type: T4
+    num_gpu: 1
+    config_variables: {}
+    mounts:
+      - mode: DOWNLOAD
+        tag: appa-real-dataset
+        path: /mnt/appa-real-dataset
+      - path: /mnt/model/
+        tag: detector_model
+        mode: DOWNLOAD
+    using: session
+    attach_project_credentials: true
+
+  - name: gradio_app
+    environment: session
+    machine_type: T4
+    num_gpu: 1
+    config_variables: {}
+    attach_project_credentials: true
+    port: 8080
+    cmd: uvicorn gradio_app:app --port 8080 --host 0.0.0.0
