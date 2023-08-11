@@ -11,11 +11,18 @@ descriptive texts.
 
 ### 0. Set up a project on Slingshot
 
-1. Create a new project on ‘[Slingshot](https://dev.slingshot.xyz/)’ 
-2. Set this Slingshot project as active on your local machine:
+1. If you haven't already, install the Slingshot SDK:
+
+```bash
+$ pip install slingshot-ai
+```
+
+2. Create a new project on [Slingshot](https://app.slingshot.xyz/)
+3. Set this Slingshot project as active on your local machine:
 
 ```bash
 $ slingshot project use
+
 Select the project you want to work on:
 dishani_mnist
 > dreambooth_dishani
@@ -29,23 +36,24 @@ gpt-exps
 1. Clone this repo
 2. Select 30 - 50 images of you in various outfits, backgrounds, and expressions and place them in a folder called **instance_images**.
    1. (Optional) If you plan to use captions for these images, create a second folder called **captions**. Caption file names must match the filename of their corresponding image.
-4. Place these folders inside a folder called `dreambooth_input_data` inside your project directory. The following snippet showcases an example directory structure.
+3. Place these folders inside a folder called `dreambooth_input_data` inside your project directory. The following snippet showcases an example directory structure.
 
 ```bash
 $ ls dreambooth_input_data
+
 captions        instance_images
 ```
 
 #### 1.2 Uploading instance images to Slingshot:
 
-In order to use your images for training, we have to make them accessible in the environment Slingshot uses to run your training script. We can use Artifacts for this.
+In order to use your images for training, we have to make them accessible in the environment Slingshot uses to run your training script. We'll use Artifacts to do this.
 A Slingshot Artifact is simply a file or folder that you can mount onto Runs, Deployments, or Apps to make these files accessible to your code. Let's create one for our instance images.
 
 ```bash
 $ slingshot artifact upload dreambooth_input_data --tag dreambooth_input_data
 ```
 
-Notice that we've associated a tag to our artifact. This makes it easy to reference this artifact in other places and attach it wherever we want. If you take a peek inside the slingshot.yaml file, you'll see a section that mounts this tag (`dreambooth_input_data`) to our training run.
+Notice that we've associated a tag to our artifact. This makes it easy to reference this artifact in other places and attach it wherever we want. If you take a peek inside the `slingshot.yaml` file, you'll see a section that mounts this tag (`dreambooth_input_data`) to our training run.
 
 ```bash
 - mode: DOWNLOAD
@@ -60,7 +68,8 @@ Push this code into your Slingshot project by running the following command:
 
 ```bash
 $ slingshot push
-Pushed new source code 'teeming-magic-111', view in browser at [https://dev.slingshot.xyz/project/dreambooth_dishani/code/14c353232b](https://dev.slingshot.xyz/project/dreambooth_dishani/code/14c353232b)
+
+Pushed new source code 'teeming-magic-111', view in browser at [https://app.slingshot.xyz/project/dreambooth_dishani/code/14c353232b](https://app.slingshot.xyz/project/dreambooth_dishani/code/14c353232b)
 ```
 
 Now, you are all set to train and generate your dream images!
@@ -102,7 +111,7 @@ There are several ways to generate images from your trained model. You can start
 model via API, or, for a more interactive experience, you can use a simple Gradio frontend we've included as a nice UI to interface with your
 model.
 
-#### Starting the App
+#### Starting the Front End UI App
 
 Start the Gradio UI by going to the Apps page, selecting the `interactive-interface` app, then clicking on
 **Start**. It'll take a few seconds to start up, but soon you'll see a link to the web interface show up.
