@@ -14,7 +14,7 @@ environments:
       - bitsandbytes
       - numpy
       - opencv-contrib-python
-      - pydantic
+      - pydantic>=2.0.0
       - scikit-image>=0.19
       - xformers
     apt_packages: []
