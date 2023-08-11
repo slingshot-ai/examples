@@ -26,7 +26,7 @@ For training, we are going to use the [APPA-REAL dataset](https://chalearnlap.cv
 Use the command below to upload the dataset to our project as an artifact. This lets us access it freely at any point just by referencing the tag used to upload.
 
 ```
-$ slingshot artifact upload appa_real_dataset --tag appa-real-dataset
+$ slingshot artifact upload appa-real-release --tag appa-real-dataset
 ```
 
 ### 2. Push code to your Slingshot environment

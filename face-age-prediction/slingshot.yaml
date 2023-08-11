@@ -51,7 +51,7 @@ runs:
     num_gpu: 1
     cmd: python train.py
     mounts:
-      - path: /mnt/appa-real-dataset
+      - path: /mnt/appa-real-release
         tag: appa-real-dataset
         mode: DOWNLOAD
       - path: /mnt/model
@@ -70,7 +70,7 @@ runs:
       batch_size: 16
       epochs: 20
       resume_path: ''
-      data_dir: /mnt/appa-real-dataset/
+      data_dir: /mnt/appa-real-release/
       checkpoint: /mnt/model/
 
     attach_project_credentials: false
@@ -97,7 +97,7 @@ apps:
     mounts:
       - mode: DOWNLOAD
         tag: appa-real-dataset
-        path: /mnt/appa-real-dataset
+        path: /mnt/appa-real-release
       - path: /mnt/model/
         tag: detector_model
         mode: DOWNLOAD
