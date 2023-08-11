@@ -113,7 +113,9 @@ model.
 
 #### Starting the Front End UI App
 
-Start the Gradio UI by going to the Apps page, selecting the `interactive-interface` app, then clicking on
+First, make sure you've started your `image-generation` deployment on the Deployments page. 
+
+Next, start the Gradio UI by going to the Apps page, selecting the `interactive-interface` app, then clicking on
 **Start**. It'll take a few seconds to start up, but soon you'll see a link to the web interface show up.
 Follow the prompts in the UI to generate images of Darth Vader baking cookies for you, or anything else you want!
 
