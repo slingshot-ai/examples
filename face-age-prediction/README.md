@@ -8,7 +8,7 @@ Similarly, for this project, to train and deploy an ML model for face age predic
 
 ### 0. Set up a project on Slingshot
 
-1. Create a new project on ‘[Slingshot](https://dev.slingshot.xyz/)’
+1. Create a new project on [Slingshot](https://app.slingshot.xyz/)
 2. Set this Slingshot project as active on your local machine:
 
 ```
@@ -41,9 +41,10 @@ You can pull the repo and push the code to Slingshot using the following command
 
 ```bash
 $ slingshot push
+
 Pushing code to Slingshot (29.59 KiB)...
 Uploading: 100%|███████████████████████████████████████████████████████████████████████████████████████| 30.3k/30.3k [00:00<00:00, 61.4kB/s]
-Pushed new source code 'tasty-apple-284', view in browser at https://dev.slingshot.xyz/project/face-age-prediction/code/5999b4ae30
+Pushed new source code 'tasty-apple-284', view in browser at https://app.slingshot.xyz/project/face-age-prediction/code/5999b4ae30
 ```
 
 ### 3. Training and Hyperparameter tuning
@@ -56,8 +57,9 @@ Remember to `slingshot apply` once you are satisfied with your `slingshot.yaml` 
 
 Once your params are set, start your training using the following command:
 
-```
+```bash
 $ slingshot run start
+
 Select run:
 > train
   download-model
@@ -81,6 +83,7 @@ To view these metrics in Weights & Biases, add you W&B API key using the command
 
 ```
 $ slingshot secret wandb
+
 wandb: You can find your API key in your browser here: https://wandb.ai/authorize
 Paste an API key from your profile and hit enter:
 Secret put successfully
@@ -105,6 +108,7 @@ To get the face detector model, you can use a Run to execute the script `get_mod
 
 ```bash
 $ slingshot run start
+
 Select run:
   train
 > download-model
@@ -117,10 +121,11 @@ The script downloads the models and uploads them as an Artifact with a tag `dete
 **5.2 Start the Deployment!**
 ```bash
 $ slingshot inference start
+
 Select deployment:
 [1] face-age-prediction
 Selected: face-age-prediction (skipped, only option available)
-Deployment started successfully! See details here: https://dev.slingshot.xyz/project/face-age-prediction/deployments/40ac06e6f0
+Deployment started successfully! See details here: https://app.slingshot.xyz/project/face-age-prediction/deployments/40ac06e6f0
 ```
 
 You can view your deployment on the frontend through the **Deployments** tab.
@@ -131,11 +136,12 @@ You can now start the Gradio app to test your deployment. This can be done throu
 **6.1 Using the CLI**
 
 ```bash
-$ slingshot inference start 
-Select deployment:
-[1] face-age-prediction
-Selected: face-age-prediction (skipped, only option available)
-Deployment started successfully! See details here: https://dev.slingshot.xyz/project/face-age-prediction/deployments/40ac06e6f0
+$ slingshot app start 
+
+Select app:
+[1] gradio_app
+Selected: gradio_app (skipped, only option available)
+Deployment started successfully! See details here: https://app.slingshot.xyz/project/face-age-prediction/deployments/40ac06e6f0
 ```
 
 **6.2 Using the frontend**
