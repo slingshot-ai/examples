@@ -81,7 +81,8 @@ def train_text_encoder(config_train: DreamboothConfigTrain):
     """Trains the text encoder from the model."""
     # TODO: Avoid the use of subshell to call train_dreambooth.py and call it directly through the Run command.
     
-    # Flag is set such that if training has been resumed, VAE should be loaded from the output model directory else it should be loaded from 'stabilityai/sd-vae-ft-mse'
+    # Flag is set such that if training has been resumed, VAE should be loaded from the output model directory else it
+    # should be loaded from 'stabilityai/sd-vae-ft-mse'
     if config_train.resume_training:
         resume_training = "--resume_training"
     else:
@@ -114,7 +115,8 @@ def train_unet(config_train: DreamboothConfigTrain):
     """Trains the UNet from the model. It can resume training if needed."""
     # TODO: Avoid the use of subshell to call train_dreambooth.py and call it directly through the Run command.
 
-    # Flag is set such that if training has been resumed, VAE should be loaded from the output model directory else it should be loaded from 'stabilityai/sd-vae-ft-mse'
+    # Flag is set such that if training has been resumed, VAE should be loaded from the output model directory else it
+    # should be loaded from 'stabilityai/sd-vae-ft-mse'
     if config_train.resume_training:
         resume_training = "--resume_training"
     else:

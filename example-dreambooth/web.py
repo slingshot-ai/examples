@@ -11,7 +11,7 @@ from slingshot.sdk import SlingshotSDK
 app = FastAPI()
 sdk = SlingshotSDK()
 
-DEPLOYMENT_NAME = "image-generation"
+DEPLOYMENT_NAME = "image-generation"  # deployment name must match the deployment name in our Slingshot project
 
 
 async def generate_image(
