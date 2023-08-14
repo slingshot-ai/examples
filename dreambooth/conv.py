@@ -1,6 +1,6 @@
 # Credits: Code used from 'https://github.com/TheLastBen/diffusers/tree/main/examples/dreambooth' 
 import torch
-from transformers import CLIPTextModel, CLIPTokenizer, CLIPTextConfig
+from transformers import CLIPTextModel, CLIPTextConfig
 from diffusers import AutoencoderKL, DDIMScheduler, StableDiffusionPipeline, UNet2DConditionModel
 
 
@@ -326,7 +326,6 @@ def convert_ldm_unet_checkpoint(v2, checkpoint, config):
 
         new_checkpoint[new_path] = unet_state_dict[old_path]
 
-  # SDのv2では1*1のconv2dがlinearに変わっているので、linear->convに変換する
   if v2:
     linear_transformer_to_conv(new_checkpoint)
 
@@ -341,9 +340,6 @@ def convert_ldm_vae_checkpoint(checkpoint, config):
   for key in keys:
     if key.startswith(vae_key):
       vae_state_dict[key.replace(vae_key, "")] = checkpoint.get(key)
-  # if len(vae_state_dict) == 0:
-  #   # 渡されたcheckpointは.ckptから読み込んだcheckpointではなくvaeのstate_dict
-  #   vae_state_dict = checkpoint
 
   new_checkpoint = {}
 
@@ -513,7 +509,6 @@ def convert_ldm_clip_checkpoint_v1(checkpoint):
 
 
 def convert_ldm_clip_checkpoint_v2(checkpoint, max_length):
-  # 嫌になるくらい違うぞ！
   def convert_key(key):
     if not key.startswith("cond_stage_model"):
       return None
@@ -559,12 +554,10 @@ def convert_ldm_clip_checkpoint_v2(checkpoint, max_length):
       continue
     new_sd[new_key] = checkpoint[key]
 
-  # attnの変換
   for key in keys:
     if '.resblocks.23.' in key:
       continue
     if '.resblocks' in key and '.attn.in_proj_' in key:
-      # 三つに分割
       values = torch.chunk(checkpoint[key], 3)
 
       key_suffix = ".weight" if "weight" in key else ".bias"
@@ -576,15 +569,13 @@ def convert_ldm_clip_checkpoint_v2(checkpoint, max_length):
       new_sd[key_pfx + "k_proj" + key_suffix] = values[1]
       new_sd[key_pfx + "v_proj" + key_suffix] = values[2]
 
-  # position_idsの追加
   new_sd["text_model.embeddings.position_ids"] = torch.Tensor([list(range(max_length))]).to(torch.int64)
   return new_sd
 
 # endregion
 
 
-# region Diffusers->StableDiffusion の変換コード
-# convert_diffusers_to_original_stable_diffusion をコピーしている（ASL 2.0）
+# region Diffusers->StableDiffusion
 
 def conv_transformer_to_linear(checkpoint):
   keys = list(checkpoint.keys())
@@ -771,7 +762,6 @@ def convert_vae_state_dict(vae_state_dict):
 
 
 def load_checkpoint_with_text_encoder_conversion(ckpt_path):
-  # text encoderの格納形式が違うモデルに対応する ('text_model'がない)
   TEXT_ENCODER_KEY_REPLACEMENTS = [
       ('cond_stage_model.transformer.embeddings.', 'cond_stage_model.transformer.text_model.embeddings.'),
       ('cond_stage_model.transformer.encoder.', 'cond_stage_model.transformer.text_model.encoder.'),
@@ -794,7 +784,6 @@ def load_checkpoint_with_text_encoder_conversion(ckpt_path):
   return checkpoint
 
 
-# TODO dtype指定の動作が怪しいので確認する text_encoderを指定形式で作れるか未確認
 def load_models_from_stable_diffusion_checkpoint(v2, ckpt_path, dtype=None):
   
   checkpoint = load_checkpoint_with_text_encoder_conversion(ckpt_path)
@@ -857,7 +846,6 @@ def load_models_from_stable_diffusion_checkpoint(v2, ckpt_path, dtype=None):
 
 def convert_text_encoder_state_dict_to_sd_v2(checkpoint, make_dummy_weights=False):
   def convert_key(key):
-    # position_idsの除去
     if ".position_ids" in key:
       return None
 
@@ -875,7 +863,7 @@ def convert_text_encoder_state_dict_to_sd_v2(checkpoint, make_dummy_weights=Fals
       elif '.self_attn.out_proj' in key:
         key = key.replace(".self_attn.out_proj.", ".attn.out_proj.")
       elif '.self_attn.' in key:
-        key = None                  # 特殊なので後で処理する
+        key = None
       else:
         raise ValueError(f"unexpected key in DiffUsers model: {key}")
     elif '.position_embedding' in key:
@@ -894,10 +882,8 @@ def convert_text_encoder_state_dict_to_sd_v2(checkpoint, make_dummy_weights=Fals
       continue
     new_sd[new_key] = checkpoint[key]
 
-  # attnの変換
   for key in keys:
     if 'layers' in key and 'q_proj' in key:
-      # 三つを結合
       key_q = key
       key_k = key.replace("q_proj", "k_proj")
       key_v = key.replace("q_proj", "v_proj")
@@ -911,7 +897,6 @@ def convert_text_encoder_state_dict_to_sd_v2(checkpoint, make_dummy_weights=Fals
       new_key = new_key.replace(".self_attn.q_proj.", ".attn.in_proj_")
       new_sd[new_key] = value
 
-  # 最後の層などを捏造するか
   if make_dummy_weights:
 
     keys = list(new_sd.keys())
@@ -919,7 +904,6 @@ def convert_text_encoder_state_dict_to_sd_v2(checkpoint, make_dummy_weights=Fals
       if key.startswith("transformer.resblocks.22."):
         new_sd[key.replace(".22.", ".23.")] = new_sd[key]
 
-    # Diffusersに含まれない重みを作っておく
     new_sd['text_projection'] = torch.ones((1024, 1024), dtype=new_sd[keys[0]].dtype, device=new_sd[keys[0]].device)
     new_sd['logit_scale'] = torch.tensor(1)
 
@@ -928,12 +912,10 @@ def convert_text_encoder_state_dict_to_sd_v2(checkpoint, make_dummy_weights=Fals
 
 def save_stable_diffusion_checkpoint(v2, output_file, text_encoder, unet, ckpt_path, epochs, steps, save_dtype=None, vae=None):
   if ckpt_path is not None:
-    # epoch/stepを参照する。またVAEがメモリ上にないときなど、もう一度VAEを含めて読み込む
     checkpoint = load_checkpoint_with_text_encoder_conversion(ckpt_path)
     state_dict = checkpoint["state_dict"]
     strict = True
   else:
-    # 新しく作る
     checkpoint = {}
     state_dict = {}
     strict = False
@@ -952,7 +934,7 @@ def save_stable_diffusion_checkpoint(v2, output_file, text_encoder, unet, ckpt_p
 
   # Convert the text encoder model
   if v2:
-    make_dummy = ckpt_path is None                 # 参照元のcheckpointがない場合は最後の層を前の層から複製して作るなどダミーの重みを入れる
+    make_dummy = ckpt_path is None
     text_enc_dict = convert_text_encoder_state_dict_to_sd_v2(text_encoder.state_dict(), make_dummy)
     update_sd("cond_stage_model.model.", text_enc_dict)
   else:

@@ -19,7 +19,7 @@ from huggingface_hub import HfFolder, whoami
 from PIL import Image
 from torchvision import transforms
 from tqdm.auto import tqdm
-from Conv import *
+from conv import *
 
 logger = get_logger(__name__)
 
@@ -459,7 +459,6 @@ def main():
 
     # Currently, it's not possible to do gradient accumulation when training two models with accelerate.accumulate
     # This will be enabled soon in accelerate. For now, we don't allow gradient accumulation when training two models.
-    # TODO (patil-suraj): Remove this check when gradient accumulation with two models is enabled in accelerate.
     if args.train_text_encoder and args.gradient_accumulation_steps > 1 and accelerator.num_processes > 1:
         raise ValueError(
             "Gradient accumulation is not supported when training the text encoder in distributed training. "
@@ -782,7 +781,7 @@ def main():
            
         accelerator.wait_for_everyone()
 
-    # Create the pipeline using using the trained modules and save it.
+    # Create the pipeline using the trained modules and save it.
     if accelerator.is_main_process:
       if args.dump_only_text_encoder:
          txt_dir=args.output_dir + "/text_encoder_trained"
