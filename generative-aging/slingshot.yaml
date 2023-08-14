@@ -1,0 +1,129 @@
+---
+environments:
+  env:
+    python_packages:
+      - jupyterlab>=3.5.0
+      - transformers
+      - torch
+      - torchvision
+      - matplotlib
+      - opencv-python
+      - Pillow
+      - tqdm
+      - scikit-learn
+      - scipy
+      - numpy
+      - pydrive
+      - Unidecode
+      - https://storage.googleapis.com/slingshot-public-assets/dlib-gpu-19.24.99-cp310-cp310-linux_x86_64.whl
+  run-env:
+    python_packages:
+      - jupyterlab>=3.5.0
+      - gdown
+  deployment-env:
+    python_packages:
+      - gradio
+      - fastapi
+      - transformers
+      - torch
+      - torchvision
+      - matplotlib
+      - gdown
+      - opencv-python
+      - Pillow
+      - tqdm
+      - scikit-learn
+      - scipy
+      - numpy
+      - Unidecode
+      - slingshot-ai
+apps:
+  - name: session
+    environment: env
+    machine_type: T4
+    num_gpu: 1
+    config_variables: {}
+    mounts:
+      - mode: DOWNLOAD
+        path: /mnt/dataset
+        tag: FFHQ-dataset
+      - mode: DOWNLOAD
+        path: /mnt/checkpoints-male
+        tag: checkpoints_males_model
+      - mode: DOWNLOAD
+        path: /mnt/checkpoints-female
+        tag: checkpoints_females_model
+      - mode: DOWNLOAD
+        path: /mnt/face_detector
+        name: shiny-science-07-05
+      - mode: DOWNLOAD
+        path: /mnt/deeplab_model
+        name: baseless-caramel-07-06
+    attach_project_credentials: false
+    using: session
+  - name: gradio_app
+    environment: deployment-env
+    machine_type: T4
+    num_gpu: 1
+    config_variables: {}
+    attach_project_credentials: true
+    port: 8080
+    cmd: uvicorn gradio_app:app --port 8080 --host 0.0.0.0
+runs:
+  - name: get-models
+    environment: run-env
+    machine_size: GPU
+    cmd: python get_models.py
+    mounts:
+      - mode: UPLOAD
+        path: /mnt/checkpoints-male
+        tag: checkpoints_males_model
+      - mode: UPLOAD
+        path: /mnt/checkpoints-female
+        tag: checkpoints_females_model
+      - mode: UPLOAD
+        path: /mnt/face_detector
+        tag: face_detector
+      - mode: UPLOAD
+        path: /mnt/deeplab_model
+        tag: deeplab_model
+    machine_type: CPU_MEDIUM
+    num_gpu: 0
+
+    attach_project_credentials: false
+
+deployments:
+  - name: gen_aging_deployment_male
+    environment: deployment-env
+    machine_type: T4
+    num_gpu: 1
+    config_variables: {}
+    mounts:
+      - mode: DOWNLOAD
+        path: /mnt/checkpoints
+        tag: checkpoints_males_model
+      - mode: DOWNLOAD
+        path: /mnt/face_detector
+        tag: face_detector
+      - mode: DOWNLOAD
+        path: /mnt/deeplab_model
+        tag: deeplab_model
+    attach_project_credentials: false
+    cmd: python inference.py
+  - name: gen_aging_deployment_female
+    environment: deployment-env
+    machine_type: T4
+    num_gpu: 1
+    config_variables: {}
+    mounts:
+      - mode: DOWNLOAD
+        path: /mnt/checkpoints
+        tag: checkpoints_females_model
+      - mode: DOWNLOAD
+        path: /mnt/face_detector
+        tag: face_detector
+      - mode: DOWNLOAD
+        path: /mnt/deeplab_model
+        tag: deeplab_model
+    attach_project_credentials: false
+    cmd: python inference.py
