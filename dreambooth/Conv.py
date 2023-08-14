@@ -1,6 +1,4 @@
 # Credits: Code used from 'https://github.com/TheLastBen/diffusers/tree/main/examples/dreambooth' 
-import argparse
-import os
 import torch
 from transformers import CLIPTextModel, CLIPTokenizer, CLIPTextConfig
 from diffusers import AutoencoderKL, DDIMScheduler, StableDiffusionPipeline, UNet2DConditionModel

@@ -1,14 +1,11 @@
 # Credits: Code modified from 'https://github.com/TheLastBen/diffusers/tree/main/examples/dreambooth' 
-import argparse
 import itertools
 import math
-import os
 from pathlib import Path
 from typing import Optional
 import subprocess
 import sys
 
-import torch
 import torch.nn.functional as F
 import torch.utils.checkpoint
 from torch.utils.data import Dataset
@@ -18,11 +15,10 @@ from accelerate.logging import get_logger
 from accelerate.utils import set_seed
 from diffusers import AutoencoderKL, DDPMScheduler, StableDiffusionPipeline, UNet2DConditionModel
 from diffusers.optimization import get_scheduler
-from huggingface_hub import HfFolder, Repository, whoami
+from huggingface_hub import HfFolder, whoami
 from PIL import Image
 from torchvision import transforms
 from tqdm.auto import tqdm
-from transformers import CLIPTextModel, CLIPTokenizer
 from Conv import *
 
 logger = get_logger(__name__)

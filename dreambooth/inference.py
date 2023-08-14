@@ -51,7 +51,8 @@ class Dreambooth(InferenceModel):
 
     async def predict(self, examples: list[bytes]) -> dict[str, list[str]]:
         """
-        This method takes prompts, negative prompts, and other parameters as input and returns a list of Dreambooth generated images as base64 encoded images.
+        This method takes prompts, negative prompts, and other parameters as input and returns a list of Dreambooth
+        generated images as base64 encoded images.
         """
 
         input_json = json.loads(examples[0].decode("utf-8"))

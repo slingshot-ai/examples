@@ -8,7 +8,7 @@ from PIL import Image
 from slingshot.sdk import SlingshotSDK
 
 sdk = SlingshotSDK()
-DEPLOYMENT_NAME = "image-generation"
+DEPLOYMENT_NAME = "image-generation"  # This deployment name must match your Slingshot project deployment
 
 IMG_SIZE = 512
 
