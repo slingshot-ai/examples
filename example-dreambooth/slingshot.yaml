@@ -56,41 +56,6 @@ environments:
       - slingshot-ai
     apt_packages: []
 runs:
-  - name: convert-weights
-    environment: web-ui
-    machine_type: CPU_SMALL
-    mounts:
-      - mode: DOWNLOAD
-        path: /mnt/dreambooth-original
-        tag: dreambooth-trained-model-example
-      - mode: UPLOAD
-        path: /mnt/dreambooth-converted
-        tag: dreambooth-trained-model-ckpt
-    cmd: python convert_to_a1111.py --model_path /mnt/dreambooth-original --checkpoint_path
-      /mnt/dreambooth-converted/dreambooth_model.ckpt
-  - name: dream_run_test
-    environment: run_env
-    machine_type: T4
-    num_gpu: 1
-    config_variables:
-      PROMPT: closeup portrait of DishaniL woman with mouth open, highly detailed,
-        science fiction, star wars concept art, intricate details, bright colors,
-        golden hour, art by marko djurdjevic, greg rutkowski, wlop, fredperry, digital
-        painting, rossdraws
-      NEGATIVE_PROMPT: ugly, disfigured face
-      NUM_SAMPLES: 4
-      GUIDANCE_SCALE: 7
-      NUM_INFERENCE_STEPS: 40
-      HEIGHT: 512
-      WIDTH: 512
-    mounts:
-      - mode: UPLOAD
-        path: /mnt/dreambooth-produced_images
-        tag: dreambooth-produced_images
-      - mode: DOWNLOAD
-        path: /mnt/dreambooth-trained-model-example
-        tag: dreambooth-trained-model-example
-    cmd: python test.py
   - name: dream_run_train
     environment: run_env
     machine_type: T4
