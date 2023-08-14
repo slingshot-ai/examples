@@ -19,7 +19,7 @@ class DreamboothConfigTrain(BaseModel):
 
     # Mounted directory with the images that the model is learning.
     instance_data_dir: Path = Path(
-        '/mnt/dreambooth_input_data/instance_images'
+        '/mnt/my_images/instance_images'
     )
 
     # Whether to resume training from a checkpoint. If False, the model will be trained from scratch. If True, the
@@ -64,7 +64,7 @@ class DreamboothConfigTrain(BaseModel):
     # The output directory where the model checkpoints will be written. During re-training, if there is a model saved
     # here then it gets loaded from this path.
     output_dir: Path = Path(
-        "/mnt/dreambooth-trained-model-example"
+        "/mnt/trained_model"
     )
 
     # Whether to use captions from a file for training images.
@@ -74,7 +74,7 @@ class DreamboothConfigTrain(BaseModel):
 
     # A folder containing the captions of images in the training data.
     captions_dir: Path = Path(
-        "/mnt/dreambooth_input_data/captions"
+        "/mnt/my_images/captions"
     )
 
     seed: int | str = Field('', alias='SEED')  # If provided, does not use a random seed.
@@ -88,7 +88,7 @@ class DreamboothConfigTrain(BaseModel):
     # The directory where the model checkpoints have been saved using previous training rounds and the pretrained model
     # will be picked up from this mount.
     model_saved_output_dir: Path = Path(
-        '/mnt/dreambooth-trained-model-example'
+        '/mnt/trained_model'
     )
     enable_text_encoder_training: bool = True
 

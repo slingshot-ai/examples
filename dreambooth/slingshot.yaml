@@ -56,7 +56,7 @@ environments:
       - slingshot-ai
     apt_packages: []
 runs:
-  - name: dream_run_train
+  - name: dreambooth-train
     environment: run_env
     machine_type: T4
     num_gpu: 1
@@ -76,24 +76,20 @@ runs:
       SAVE_CHECKPOINT_EVERY: 500
     mounts:
       - mode: UPLOAD
-        path: /mnt/dreambooth-trained-model-example
-        tag: dreambooth-trained-model-example
+        path: /mnt/trained_model
+        tag: trained_model
       - mode: DOWNLOAD
-        path: /mnt/dreambooth_input_data
-        tag: dreambooth_input_data
+        path: /mnt/my_images
+        tag: my_images
       - mode: DOWNLOAD
-        path: /mnt/dreambooth-trained-model-example
-        tag: dreambooth-trained-model-example
+        path: /mnt/trained_model
+        tag: trained_model
     cmd: python train.py
 apps:
   - name: interactive-interface
     environment: web-ui
     machine_type: CPU_SMALL
     config_variables: {}
-    mounts:
-      - mode: DOWNLOAD
-        path: /mnt/test
-        tag: dreambooth-sample-image
     service_account: true
     port: 8080
     cmd: uvicorn web:app --host 0.0.0.0 --port 8080
@@ -103,7 +99,7 @@ deployments:
     machine_type: T4
     mounts:
       - mode: DOWNLOAD
-        tag: dreambooth-trained-model-example
+        tag: trained_model
         path: /mnt/model
     cmd: python inference.py
     num_gpu: 1

@@ -36,10 +36,10 @@ gpt-exps
 1. Clone this repo
 2. Select 30 - 50 images of you in various outfits, backgrounds, and expressions and place them in a folder called **instance_images**.
    1. (Optional) If you plan to use captions for these images, create a second folder called **captions**. Caption file names must match the filename of their corresponding image.
-3. Place these folders inside a folder called `dreambooth_input_data` inside your project directory. The following snippet showcases an example directory structure.
+3. Place these folders inside a folder called `my_images` inside your project directory. The following snippet showcases an example directory structure.
 
 ```bash
-$ ls dreambooth_input_data
+$ ls my_images
 
 captions        instance_images
 ```
@@ -50,15 +50,15 @@ In order to use your images for training, we have to make them accessible in the
 A Slingshot Artifact is simply a file or folder that you can mount onto Runs, Deployments, or Apps to make these files accessible to your code. Let's create one for our instance images.
 
 ```bash
-$ slingshot artifact upload dreambooth_input_data --tag dreambooth_input_data
+$ slingshot artifact upload my_images --tag my_images
 ```
 
 Notice that we've associated a tag to our artifact. This makes it easy to reference this artifact in other places and attach it wherever we want. If you take a peek inside the `slingshot.yaml` file, you'll see a section that mounts this tag (`dreambooth_input_data`) to our training run.
 
 ```bash
 - mode: DOWNLOAD
-        path: /mnt/dreambooth_input_data
-        tag: dreambooth_input_data
+        path: /mnt/my_images
+        tag: my_images
 ```
 
 ### 2. Push code to your Slingshot environment
@@ -92,9 +92,8 @@ Once your parameters are set, kick off your training run using:
 ```bash
 $ slingshot run start
 Select run:
-> dream_run_train
-  convert-weights
-Selected: dream_run_train
+> dreambooth-train
+Selected: dreambooth-train
 ```
 
 **Using the frontend**
