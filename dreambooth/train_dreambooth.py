@@ -32,7 +32,7 @@ def parse_args():
         default=None,
         required=True,
         help="Path to pretrained model or model identifier from huggingface.co/models.",
-    ) 
+    )
     parser.add_argument(
         "--pretrained_vae_path",
         type=str,
@@ -196,94 +196,91 @@ def parse_args():
         "--save_n_steps",
         type=int,
         default=1,
-        help=("Save the model every n global_steps"),
+        help="Save the model every n global_steps",
     )
-    
-    
+
     parser.add_argument(
         "--save_starting_step",
         type=int,
         default=1,
-        help=("The step from which it starts saving intermediary checkpoints"),
+        help="The step from which it starts saving intermediary checkpoints",
     )
-    
+
     parser.add_argument(
         "--stop_text_encoder_training",
         type=int,
         default=1000000,
-        help=("The step at which the text_encoder is no longer trained"),
+        help="The step at which the text_encoder is no longer trained",
     )
-
 
     parser.add_argument(
         "--image_captions_filename",
         action="store_true",
         help="Get captions from filename",
-    )    
-    
+    )
+
     parser.add_argument(
         "--resume_training",
         action="store_true",
-        default=False,        
+        default=False,
         help="Resumed training or not",
     )
-    
+
     parser.add_argument(
         "--dump_only_text_encoder",
         action="store_true",
-        default=False,        
+        default=False,
         help="Dump only text-encoder",
     )
 
     parser.add_argument(
         "--train_only_unet",
         action="store_true",
-        default=False,        
+        default=False,
         help="Train only the unet",
     )
-    
+
     parser.add_argument(
         "--train_only_text_encoder",
         action="store_true",
-        default=False,        
+        default=False,
         help="Train only the text-encoder",
     )
-    
+
     parser.add_argument(
         "--Style",
         action="store_true",
-        default=False,        
+        default=False,
         help="Further reduce overfitting",
-    )    
-    
+    )
+
     parser.add_argument(
         "--Session_dir",
         type=str,
-        default="",     
+        default="",
         help="Current session directory",
-    )    
+    )
 
     parser.add_argument(
         "--external_captions",
         action="store_true",
-        default=False,        
+        default=False,
         help="Use captions stored in a txt file",
-    )    
-    
+    )
+
     parser.add_argument(
         "--captions_dir",
         type=str,
         default="",
         help="The folder where captions files are stored",
-    )       
+    )
 
     parser.add_argument(
         "--offset_noise",
         action="store_true",
-        default=False,        
+        default=False,
         help="Offset Noise",
     )
-
 
     parser.add_argument("--local_rank", type=int, default=-1, help="For distributed training: local_rank")
 
@@ -311,15 +308,15 @@ class DreamBoothDataset(Dataset):
     """
 
     def __init__(
-        self,
-        instance_data_root,
-        instance_prompt,
-        tokenizer,
-        args,
-        class_data_root=None,
-        class_prompt=None,
-        size=512,
-        center_crop=False,
+            self,
+            instance_data_root,
+            instance_prompt,
+            tokenizer,
+            args,
+            class_data_root=None,
+            class_prompt=None,
+            size=512,
+            center_crop=False,
     ):
         self.size = size
         self.center_crop = center_crop
@@ -337,7 +334,7 @@ class DreamBoothDataset(Dataset):
 
         if args.image_captions_filename:
             self.image_captions_filename = True
-        
+
         if class_data_root is not None:
             self.class_data_root = Path(class_data_root)
             self.class_data_root.mkdir(parents=True, exist_ok=True)
@@ -366,34 +363,33 @@ class DreamBoothDataset(Dataset):
         instance_image = Image.open(path)
         if not instance_image.mode == "RGB":
             instance_image = instance_image.convert("RGB")
-            
+
         instance_prompt = self.instance_prompt
-        
+
         if self.image_captions_filename:
             filename = Path(path).stem
-            
-            pt=''.join([i for i in filename if not i.isdigit()])
-            pt=pt.replace("_"," ")
-            pt=pt.replace("(","")
-            pt=pt.replace(")","")
-            pt=pt.replace("-","")
-            pt=pt.replace("conceptimagedb","")  
-            
+
+            pt = ''.join([i for i in filename if not i.isdigit()])
+            pt = pt.replace("_", " ")
+            pt = pt.replace("(", "")
+            pt = pt.replace(")", "")
+            pt = pt.replace("-", "")
+            pt = pt.replace("conceptimagedb", "")
+
             if args.external_captions:
-              cptpth=os.path.join(args.captions_dir, filename+'.txt')
-              if os.path.exists(cptpth):
-                with open(cptpth, "r") as f:
-                   instance_prompt=pt+' '+f.read()
-              else:
-                instance_prompt=pt
+                cptpth = os.path.join(args.captions_dir, filename + '.txt')
+                if os.path.exists(cptpth):
+                    with open(cptpth, "r") as f:
+                        instance_prompt = pt + ' ' + f.read()
+                else:
+                    instance_prompt = pt
             else:
                 if args.Style:
-                  instance_prompt = ""
+                    instance_prompt = ""
                 else:
-                  instance_prompt = pt
-            sys.stdout.write(" [0;32m" +instance_prompt[:45]+" [0m")
+                    instance_prompt = pt
+            sys.stdout.write(" [0;32m" + instance_prompt[:45] + " [0m")
             sys.stdout.flush()
-
 
         example["instance_images"] = self.image_transforms(instance_image)
         example["instance_prompt_ids"] = self.tokenizer(
@@ -418,9 +414,8 @@ class DreamBoothDataset(Dataset):
         return example
 
 
-
 class PromptDataset(Dataset):
-    "A simple dataset to prepare the prompts to generate class images on multiple GPUs."
+    """A simple dataset to prepare the prompts to generate class images on multiple GPUs."""
 
     def __init__(self, prompt, num_samples):
         self.prompt = prompt
@@ -430,9 +425,7 @@ class PromptDataset(Dataset):
         return self.num_samples
 
     def __getitem__(self, index):
-        example = {}
-        example["prompt"] = self.prompt
-        example["index"] = index
+        example = {"prompt": self.prompt, "index": index}
         return example
 
 
@@ -449,7 +442,7 @@ def get_full_repo_name(model_id: str, organization: Optional[str] = None, token:
 def main():
     args = parse_args()
     logging_dir = Path(args.output_dir, args.logging_dir)
-    i=args.save_starting_step
+    i = args.save_starting_step
     accelerator = Accelerator(
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         mixed_precision=args.mixed_precision,
@@ -491,9 +484,9 @@ def main():
             pipeline.to(accelerator.device)
 
             for example in tqdm(
-                sample_dataloader, desc="Generating class images", disable=not accelerator.is_local_main_process
+                    sample_dataloader, desc="Generating class images", disable=not accelerator.is_local_main_process
             ):
-                with torch.autocast("cuda"):                
+                with torch.autocast("cuda"):
                     images = pipeline(example["prompt"]).images
 
                 for i, image in enumerate(images):
@@ -503,7 +496,6 @@ def main():
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
 
-
     # Load the tokenizer
     if args.tokenizer_name:
         tokenizer = CLIPTokenizer.from_pretrained(args.tokenizer_name)
@@ -512,13 +504,13 @@ def main():
 
     # Load models and create wrapper for stable diffusion
     if args.train_only_unet or args.dump_only_text_encoder:
-      if os.path.exists(str(args.output_dir+"/text_encoder_trained")):
-        text_encoder = CLIPTextModel.from_pretrained(args.output_dir, subfolder="text_encoder_trained")
-      else:
-        text_encoder = CLIPTextModel.from_pretrained(args.pretrained_model_name_or_path, subfolder="text_encoder")
+        if os.path.exists(str(args.output_dir + "/text_encoder_trained")):
+            text_encoder = CLIPTextModel.from_pretrained(args.output_dir, subfolder="text_encoder_trained")
+        else:
+            text_encoder = CLIPTextModel.from_pretrained(args.pretrained_model_name_or_path, subfolder="text_encoder")
     else:
-      text_encoder = CLIPTextModel.from_pretrained(args.pretrained_model_name_or_path, subfolder="text_encoder")
-    
+        text_encoder = CLIPTextModel.from_pretrained(args.pretrained_model_name_or_path, subfolder="text_encoder")
+
     vae = None
     if args.resume_training:
         print(f"Inside VAE loading {args.resume_training = }")
@@ -657,8 +649,8 @@ def main():
         accelerator.init_trackers("dreambooth", config=vars(args))
 
     def bar(prg):
-       br='|'+'█' * prg + ' ' * (25-prg)+'|'
-       return br
+        br = '|' + '█' * prg + ' ' * (25 - prg) + '|'
+        return br
 
     # Train!
     total_batch_size = args.train_batch_size * accelerator.num_processes * args.gradient_accumulation_steps
@@ -687,9 +679,10 @@ def main():
 
                 # Sample noise that we'll add to the latents
                 if args.offset_noise:
-                  noise = torch.randn_like(latents) + 0.1 * torch.randn(latents.shape[0], latents.shape[1], 1, 1, device=latents.device)
+                    noise = torch.randn_like(latents) + 0.1 * torch.randn(latents.shape[0], latents.shape[1], 1, 1,
+                                                                          device=latents.device)
                 else:
-                  noise = torch.randn_like(latents)
+                    noise = torch.randn_like(latents)
 
                 bsz = latents.shape[0]
                 # Sample a random timestep for each image
@@ -747,74 +740,77 @@ def main():
                 progress_bar.update(1)
                 global_step += 1
 
-            fll=round((global_step*100)/args.max_train_steps)
-            fll=round(fll/4)
-            pr=bar(fll)
-            
+            fll = round((global_step * 100) / args.max_train_steps)
+            fll = round(fll / 4)
+            pr = bar(fll)
+
             logs = {"loss": loss.detach().item(), "lr": lr_scheduler.get_last_lr()[0]}
             progress_bar.set_postfix(**logs)
-            progress_bar.set_description_str("Progress:"+pr)
+            progress_bar.set_description_str("Progress:" + pr)
             accelerator.log(logs, step=global_step)
 
             if global_step >= args.max_train_steps:
                 break
-                       
+
             if args.save_n_steps >= 200:
-               if global_step < args.max_train_steps and global_step+1==i:
-                  inst=os.path.basename(args.Session_dir)
-                  inst =inst + "_step_" + str(global_step+1)
-                  print(" [1;32mSAVING CHECKPOINT...")
-                  if accelerator.is_main_process:
-                     pipeline = StableDiffusionPipeline.from_pretrained(
-                           args.pretrained_model_name_or_path,
-                           unet=accelerator.unwrap_model(unet),
-                           text_encoder=accelerator.unwrap_model(text_encoder),
-                     )               
-                     chkpth=args.Session_dir+"/"+inst+".ckpt"
-                     if args.mixed_precision=="fp16":
-                        save_stable_diffusion_checkpoint(unet.config.cross_attention_dim == 1024, chkpth, pipeline.text_encoder, pipeline.unet, None, 0, 0, torch.float16, pipeline.vae)
-                     else:
-                        save_stable_diffusion_checkpoint(unet.config.cross_attention_dim == 1024, chkpth, pipeline.text_encoder, pipeline.unet, None, 0, 0, None, pipeline.vae)
-                     print("Done, resuming training ...[0m")   
-                     i=i+args.save_n_steps
-                    
-           
+                if global_step < args.max_train_steps and global_step + 1 == i:
+                    inst = os.path.basename(args.Session_dir)
+                    inst = inst + "_step_" + str(global_step + 1)
+                    print(" [1;32mSAVING CHECKPOINT...")
+                    if accelerator.is_main_process:
+                        pipeline = StableDiffusionPipeline.from_pretrained(
+                            args.pretrained_model_name_or_path,
+                            unet=accelerator.unwrap_model(unet),
+                            text_encoder=accelerator.unwrap_model(text_encoder),
+                        )
+                        chkpth = args.Session_dir + "/" + inst + ".ckpt"
+                        if args.mixed_precision == "fp16":
+                            save_stable_diffusion_checkpoint(unet.config.cross_attention_dim == 1024, chkpth,
+                                                             pipeline.text_encoder, pipeline.unet, None, 0, 0,
+                                                             torch.float16, pipeline.vae)
+                        else:
+                            save_stable_diffusion_checkpoint(unet.config.cross_attention_dim == 1024, chkpth,
+                                                             pipeline.text_encoder, pipeline.unet, None, 0, 0, None,
+                                                             pipeline.vae)
+                        print("Done, resuming training ...[0m")
+                        i = i + args.save_n_steps
+
         accelerator.wait_for_everyone()
 
     # Create the pipeline using the trained modules and save it.
     if accelerator.is_main_process:
-      if args.dump_only_text_encoder:
-         txt_dir=args.output_dir + "/text_encoder_trained"
-         if args.train_only_text_encoder:            
-             pipeline = StableDiffusionPipeline.from_pretrained(
-                 args.pretrained_model_name_or_path,
-                 text_encoder=accelerator.unwrap_model(text_encoder),
-             )
-             pipeline.save_pretrained(args.output_dir)     
-         else:
-             if not os.path.exists(txt_dir):
-               os.mkdir(txt_dir)
-             pipeline = StableDiffusionPipeline.from_pretrained(
-                 args.pretrained_model_name_or_path,
-                 unet=accelerator.unwrap_model(unet),
-                 text_encoder=accelerator.unwrap_model(text_encoder),
-             )
-             pipeline.text_encoder.save_pretrained(txt_dir)
+        if args.dump_only_text_encoder:
+            txt_dir = args.output_dir + "/text_encoder_trained"
+            if args.train_only_text_encoder:
+                pipeline = StableDiffusionPipeline.from_pretrained(
+                    args.pretrained_model_name_or_path,
+                    text_encoder=accelerator.unwrap_model(text_encoder),
+                )
+                pipeline.save_pretrained(args.output_dir)
+            else:
+                if not os.path.exists(txt_dir):
+                    os.mkdir(txt_dir)
+                pipeline = StableDiffusionPipeline.from_pretrained(
+                    args.pretrained_model_name_or_path,
+                    unet=accelerator.unwrap_model(unet),
+                    text_encoder=accelerator.unwrap_model(text_encoder),
+                )
+                pipeline.text_encoder.save_pretrained(txt_dir)
 
-      elif args.train_only_unet:
-        pipeline = StableDiffusionPipeline.from_pretrained(
-            args.pretrained_model_name_or_path,
-            unet=accelerator.unwrap_model(unet),
-            text_encoder=accelerator.unwrap_model(text_encoder),
-        )
-        pipeline.save_pretrained(args.output_dir)
+        elif args.train_only_unet:
+            pipeline = StableDiffusionPipeline.from_pretrained(
+                args.pretrained_model_name_or_path,
+                unet=accelerator.unwrap_model(unet),
+                text_encoder=accelerator.unwrap_model(text_encoder),
+            )
+            pipeline.save_pretrained(args.output_dir)
 
-        txt_dir=args.output_dir + "/text_encoder_trained"
-        if os.path.exists(txt_dir):
-           subprocess.call('rm -r '+txt_dir, shell=True)
-               
-            
+            txt_dir = args.output_dir + "/text_encoder_trained"
+            if os.path.exists(txt_dir):
+                subprocess.call('rm -r ' + txt_dir, shell=True)
+
     accelerator.end_training()
+
 
 if __name__ == "__main__":
     main()
