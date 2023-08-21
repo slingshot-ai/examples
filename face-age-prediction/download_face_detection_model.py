@@ -23,7 +23,7 @@ def download_file(file_info: dict) -> None:
     with save_path.open('wb') as f:
         for chunk in response.iter_content(chunk_size=8192):
             f.write(chunk)
-        
+
 
 def download_face_detection_model() -> None:
     """

@@ -18,7 +18,8 @@ from dataset import FaceDataset
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def train(train_loader: DataLoader, model: nn.Module, criterion: nn.Module, optimizer: nn.Module) -> tuple[float, float]:
+def train(train_loader: DataLoader, model: nn.Module, criterion: nn.Module, optimizer: nn.Module) -> tuple[
+    float, float]:
     """Perform one epoch's training"""
     model.train()
     total_loss = 0.0
@@ -76,9 +77,9 @@ def validate(validate_loader: DataLoader, model: nn.Module) -> float:
         outputs = model(x)
         outputs = outputs.softmax(-1)
         ages = torch.arange(0, 101).to('cuda').float()
-        outputs = (outputs * ages).sum(axis=-1)
+        outputs = (outputs * ages).sum(axis=-1)  # Calculate the expected value of the distribution of ages
 
-        loss = F.l1_loss(outputs, y, reduction='sum')
+        loss = F.l1_loss(outputs, y, reduction='sum')  # Calculate the mean absolute error
 
         total_loss += loss.item()
         num_samples += x.size(0)

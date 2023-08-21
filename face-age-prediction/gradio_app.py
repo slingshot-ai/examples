@@ -29,7 +29,7 @@ async def inference(img: Image) -> Image:
 
     b64_img = b64encode(img_bytes).decode("utf-8")
 
-    json_example = {"image": b64_img}
+    json_example = {"image": b64_img} # TODO: Update to just sent the img_bytes
 
     # convert json_example to bytes
     json_example = json.dumps(json_example).encode("utf-8")
