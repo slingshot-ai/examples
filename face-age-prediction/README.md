@@ -1,8 +1,8 @@
 # Face Age Prediction 👧👩👵
 
-As humans, there is one job that we constantly do subconsciously and want to be good at and that is making a correct estimation or prediction. In order to do that, we have made several mental models that help us. 
+As humans, there is one job that we constantly do subconsciously and want to be good at and that is making a correct estimation or prediction. In order to do that, we have made several mental models that help us.
 
-If we have to guess a person’s age from a photo, we would be easily able to make a fair estimate of their age. Upon retrospecting, one would realize that they actually focused on certain features of the face like the size, texture of the skin, wrinkles, and maybe gender. 
+If we have to guess a person’s age from a photo, we would be easily able to make a fair estimate of their age. Upon retrospecting, one would realize that they actually focused on certain features of the face like the size, texture of the skin, wrinkles, and maybe gender.
 
 Similarly, for this project, to train and deploy an ML model for face age prediction, we will use an encoder that takes the image of a person as input and compresses this huge spatial information into a lower-sized embedding space or feature space. These features are now rich in semantic information rather than local information which is not very useful in predicting the age of a person.
 
@@ -16,26 +16,25 @@ $ slingshot project use
 Select the project you want to work on:
 dishani_mnist
 > face-age-prediction
-gpt-exps
 ```
 
 ### 1. Dataset download and upload as an Artifact
 
-For training, we are going to use the [APPA-REAL dataset](https://chalearnlap.cvc.uab.cat/dataset/26/description/). You can download this dataset on your local machine at any location temporarily. 
+For training, we are going to use the [APPA-REAL dataset](https://chalearnlap.cvc.uab.cat/dataset/26/description/). You can download this dataset on your local machine at any location temporarily.
 
 Use the command below to upload the dataset to our project as an artifact. This lets us access it freely at any point just by referencing the tag used to upload.
 
 ```
-$ slingshot artifact upload appa-real-release --tag appa-real-dataset
+$ slingshot artifact upload appa_real_dataset --tag appa-real-dataset
 ```
 
 ### 2. Push code to your Slingshot environment
 
-We have provided a training script along with the dataloader (for the APPA-REAL dataset) to get you started. In the script, we have fine-tuned the ResNet-18 model (and the fully connected layers modified for our problem statement) with the pre-trained weights. Using this model along with the default hyperparameters, you will observe a Mean Absolute Error (MAE) of ~5. 
+We have provided a training script along with the dataloader (for the APPA-REAL dataset) to get you started. In the script, we have fine-tuned the ResNet-18 model (and the fully connected layers modified for our problem statement) with the pre-trained weights. Using this model along with the default hyperparameters, you will observe a Mean Absolute Error (MAE) of ~5.
 
 **An exercise for the readers:**
 
-ResNet-18 is a pretty small model considering the high parameter-sized models currently available. You can swap this out with a larger model and report if MAE reduces or saturates after a certain point. 
+ResNet-18 is a pretty small model considering the high parameter-sized models currently available. You can swap this out with a larger model and report if MAE reduces or saturates after a certain point.
 
 You can pull the repo and push the code to Slingshot using the following command:
 
@@ -51,7 +50,7 @@ Pushed new source code 'tasty-apple-284', view in browser at https://app.slingsh
 
 **Using the CLI**
 
-You can change the hyperparameters under `config variables` in the `slingshot.yaml` itself. 
+You can change the hyperparameters under `config variables` in the `slingshot.yaml` itself.
 
 Remember to `slingshot apply` once you are satisfied with your `slingshot.yaml` in order to see these changes reflected.
 
@@ -61,9 +60,9 @@ Once your params are set, start your training using the following command:
 $ slingshot run start
 
 Select run:
-> train
-  download-model
-Selected: train
+> train-resnet-model
+  download-face-detector-model
+Selected: train-resnet-model
 
 ```
 
@@ -97,22 +96,22 @@ We've provided a deployment called `face-age-prediction` and its inference code 
 
 During inference, the pipeline consists of:
 1. The face bounding box detection
-2. Extraction of the face (with some margin) 
+2. Extraction of the face (with some margin)
 3. Prediction of age using the model we trained
 
 We'll use a separate model to power step 1
 
 **5.1 Download detection model and upload as artifact**
 
-To get the face detector model, you can use a Run to execute the script `get_model.py`. 
+To get the face detector model, you can use a Run to execute the script `download_model.py`.
 
 ```bash
 $ slingshot run start
 
 Select run:
-  train
-> download-model
-Selected: download-model
+  train-resnet-model
+> download-face-detector-model
+Selected: download-face-detector-model
 
 ```
 The script downloads the models and uploads them as an Artifact with a tag `detector_model` which can be used to reference the models later in the deployment.
@@ -139,8 +138,8 @@ You can now start the Gradio app to test your deployment. This can be done throu
 $ slingshot app start 
 
 Select app:
-[1] gradio_app
-Selected: gradio_app (skipped, only option available)
+[1] front-end-ui
+Selected: front-end-ui (skipped, only option available)
 Deployment started successfully! See details here: https://app.slingshot.xyz/project/face-age-prediction/deployments/40ac06e6f0
 ```
 

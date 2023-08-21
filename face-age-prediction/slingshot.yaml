@@ -24,7 +24,7 @@ environments:
       - torchvision
       - opencv-python-headless
       - pretrainedmodels
-      - slingshot-ai==0.0.17
+      - slingshot-ai
   session:
     python_version: '3.10'
     python_packages:
@@ -33,10 +33,10 @@ environments:
       - torchvision
       - opencv-python
       - wget
-      - slingshot-ai==0.0.17
+      - slingshot-ai
       - gradio
 runs:
-  - name: download-model
+  - name: download-face-detector-model
     environment: deployment
     cmd: python download_model.py
     mounts:
@@ -45,7 +45,7 @@ runs:
         tag: detector_model
     machine_type: CPU_MEDIUM
     num_gpu: 0
-  - name: train
+  - name: train-resnet-model
     environment: training
     machine_type: T4
     num_gpu: 1
@@ -104,11 +104,13 @@ apps:
     using: session
     attach_project_credentials: true
 
-  - name: gradio_app
+  - name: front-end-ui
     environment: session
-    machine_type: T4
-    num_gpu: 1
-    config_variables: {}
+    machine_type: CPU_MEDIUM
+    num_gpu: 0
+    using: webapp
+    config_variables:
+      deployment_name: face-age-prediction
     attach_project_credentials: true
     port: 8080
     cmd: uvicorn gradio_app:app --port 8080 --host 0.0.0.0

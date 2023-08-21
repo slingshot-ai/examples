@@ -1,28 +1,23 @@
+import json
 import os
-from tqdm import tqdm
 from pathlib import Path
 
-import wandb
 import torch
-from torch import nn
-import torchvision
-import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
-from torch.utils.data import DataLoader
-from torch.optim.lr_scheduler import StepLR
-
+import torch.nn.functional as F
+import torchvision
+import wandb
 from config import Config
 from dataset import FaceDataset
+from torch import nn
+from torch.optim.lr_scheduler import StepLR
+from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def train(
-    train_loader: DataLoader,
-    model: nn.Module,
-    criterion: nn.Module,
-    optimizer: nn.Module,
-) -> float:
+def train(train_loader: DataLoader, model: nn.Module, criterion: nn.Module, optimizer: nn.Module) -> float:
     """Perform one epoch's training"""
     model.train()
     total_loss = 0
@@ -37,7 +32,6 @@ def train(
         outputs = model(x)
         outputs = outputs.softmax(-1)
 
-        # TODO: Experiment with normalizing the output to get a more stable training.
         ages = torch.arange(0, 101).to('cuda')
         outputs = (outputs * ages).sum(axis=-1)
 
@@ -127,9 +121,7 @@ def main(config_train: Config):
     else:
         print("Using Adam optimizer")
         optimizer = torch.optim.Adam(
-            model.parameters(),
-            lr=config_train.learning_rate,
-            weight_decay=config_train.weight_decay,
+            model.parameters(), lr=config_train.learning_rate, weight_decay=config_train.weight_decay
         )
 
     # Setting up model weights to restart training from a given checkpoint
@@ -155,11 +147,7 @@ def main(config_train: Config):
 
     # Setting up the training dataset and dataloader
     train_dataset = FaceDataset(
-        config_train.data_dir,
-        "train",
-        img_size=config_train.img_size,
-        augment=True,
-        age_stddev=config_train.age_stddev,
+        config_train.data_dir, "train", img_size=config_train.img_size, augment=True, age_stddev=config_train.age_stddev
     )
     train_loader = DataLoader(
         train_dataset,
@@ -170,12 +158,7 @@ def main(config_train: Config):
     )
 
     # Setting up the validation dataset and dataloader
-    val_dataset = FaceDataset(
-        config_train.data_dir,
-        "valid",
-        img_size=config_train.img_size,
-        augment=False,
-    )
+    val_dataset = FaceDataset(config_train.data_dir, "valid", img_size=config_train.img_size, augment=False)
     val_loader = DataLoader(
         val_dataset,
         batch_size=config_train.batch_size,
@@ -191,16 +174,8 @@ def main(config_train: Config):
 
         val_mae = validate(val_loader, model)
 
-        print(
-            f"Epoch: {epoch} | train loss: {train_loss} | train_accuracy: {train_accuracy} | val mae: {val_mae}"
-        )
-        wandb.log(
-            {
-                "train_loss": train_loss,
-                "train_accuracy": train_accuracy,
-                "val_mae": val_mae,
-            }
-        )
+        print(f"Epoch: {epoch} | train loss: {train_loss} | train_accuracy: {train_accuracy} | val mae: {val_mae}")
+        wandb.log({"train_loss": train_loss, "train_accuracy": train_accuracy, "val_mae": val_mae})
 
         # update learning rate
         scheduler.step()
@@ -213,11 +188,7 @@ def main(config_train: Config):
             print(f"Saving best checkpoint to {checkpoint_dir_path}")
 
             torch.save(
-                {
-                    'epoch': epoch + 1,
-                    'state_dict': model.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
-                },
+                {'epoch': epoch + 1, 'state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict()},
                 checkpoint_dir_path,
             )
             best_val_mae = val_mae
@@ -229,9 +200,7 @@ def main(config_train: Config):
 
 
 if __name__ == '__main__':
-    config_train: Config = Config.parse_raw(os.environ["CONFIG"])
-    print(
-        f"{config_train.learning_rate = }, {config_train.optimizer = }, {config_train.learning_rate_decay_rate = }"
-    )
+    config_train = json.loads(os.environ.get("CONFIG", "{}"))
+    config_train = Config.parse_obj(config_train)
 
     main(config_train)
