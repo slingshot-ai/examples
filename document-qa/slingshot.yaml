@@ -1,0 +1,107 @@
+---
+environments:
+  session_env:
+    python_packages:
+      - jupyterlab>=3.5.0
+      - bs4
+      - chardet
+      - tiktoken
+      - scikit-learn
+    apt_packages: []
+  download-essays-env:
+    python_version: '3.10'
+    python_packages:
+      - beautifulsoup4
+      - chardet
+      - aiohttp
+    apt_packages: []
+  embed-documents-env:
+    python_version: '3.10'
+    python_packages:
+      - numpy
+      - slingshot-ai
+      - tqdm
+      - tiktoken
+      - scikit-learn
+      - openai
+      - transformers
+      - uvicorn
+      - fastapi
+    apt_packages: []
+  deployment_env:
+    python_version: '3.10'
+    python_packages:
+      - numpy
+      - slingshot-ai
+      - tiktoken
+      - scikit-learn
+      - openai
+      - transformers
+      - uvicorn
+      - fastapi
+    apt_packages: []
+  app-env:
+    python_version: '3.10'
+    python_packages:
+      - fastapi
+      - gradio
+      - uvicorn
+      - slingshot-ai
+    apt_packages: []
+apps:
+  - name: session
+    environment: session_env
+    machine_type: CPU_TINY
+    config_variables: {}
+    using: session
+    attach_project_credentials: true
+  - name: front-end-ui
+    environment: app-env
+    machine_type: CPU_SMALL
+    config_variables: {}
+    mounts: []
+    attach_project_credentials: true
+    using: webapp
+    port: 8080
+    cmd: uvicorn src.web:app --port 8080 --host 0.0.0.0
+runs:
+  - name: download-essays
+    environment: download-essays-env
+    machine_type: CPU_SMALL
+    config_variables: {}
+    mounts:
+      - mode: UPLOAD
+        path: /mnt/documents
+        tag: documents
+    attach_project_credentials: false
+    cmd: python src/download_essays.py
+  - name: embed-documents
+    environment: embed-documents-env
+    machine_type: CPU_SMALL
+    config_variables: {}
+    mounts:
+      - mode: DOWNLOAD
+        path: /mnt/documents
+        tag: documents
+      - mode: DOWNLOAD
+        path: /mnt/embeddings
+        tag: embeddings
+      - mode: UPLOAD
+        path: /mnt/embeddings
+        tag: embeddings
+    attach_project_credentials: true
+    cmd: python src/embed_documents.py
+deployments:
+  - name: document-qa-deployment
+    environment: deployment_env
+    machine_type: CPU_SMALL
+    config_variables: {}
+    mounts:
+      - mode: DOWNLOAD
+        path: /mnt/documents
+        tag: documents
+      - mode: DOWNLOAD
+        path: /mnt/embeddings
+        tag: embeddings
+    attach_project_credentials: true
+    cmd: python src/inference.py
