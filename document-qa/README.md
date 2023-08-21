@@ -3,9 +3,9 @@
 This example [Slingshot](https://www.slingshot.xyz/) project walks through how to combine an existing set of documents
 with GPT 3.5 turbo, and place the result behind a front-end app that allows you to query the augmented model.
 
-We're using the [essays of Paul Graham ](http://www.paulgraham.com/) in this example, but the modular nature of the 
-project allows you to swap out the essays for any set of documents. You could easily modify this example to create a 
-GPT 3.5-powered chatbot augmented with all of your internal company knowledge, or a chatbot that has knowledge of the 
+We're using the [essays of Paul Graham ](http://www.paulgraham.com/) in this example, but the modular nature of the
+project allows you to swap out the essays for any set of documents. You could easily modify this example to create a
+GPT 3.5-powered chatbot augmented with all of your internal company knowledge, or a chatbot that has knowledge of the
 most recent publications of leading medical journals.
 
 This project is a perfect blueprint to demonstrate how you can combine existing LLMs with outside information to create
@@ -26,12 +26,16 @@ Finally, run `slingshot push` to push local files to your Slingshot project
 
 ## Download Graham's essays
 
-First, let's prepare our retrieval dataset. For this use case, we'll scrape Paul Graham's essays from his blog.
+First, let's prepare our retrieval dataset. For this use case, we'll scrape Paul Graham's essays from his blog. We've
+already written a script for this, which you can run via the Runs page, or from the commandline with:
 
-To do this simply go to the Runs page and start the Run called `download-essays`. It'll create a new artifact containing
-the raw text of all of Graham's essays.
+```bash
+slingshot run download-essays
+```
 
-## Preprocessing
+This will create a new artifact containing the parsed text of Graham's essays.
+
+## Generate Embeddings
 
 As part of our pipeline, we use document embeddings to retrieve initial candidates for relevant essays regarding the
 asked question.

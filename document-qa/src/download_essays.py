@@ -18,7 +18,7 @@ https://slingshot-ai.gitbook.io/slingshot-ai-docs/using-slingshot/concepts/stora
 """
 
 
-async def get_document(url: str) -> str:
+async def get_document(url: str) -> str:  # Rename
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers={"User-Agent": "Mozilla/5.0"}) as response:
             bytes_ = await response.content.read()
@@ -26,7 +26,7 @@ async def get_document(url: str) -> str:
             return bytes_.decode(encoding)
 
 
-async def get_article(url: str) -> str:
+async def get_article(url: str) -> str:  # Rename
     document = await get_document(url)
     soup = bs4.BeautifulSoup(document, "html.parser")
 
@@ -38,24 +38,25 @@ async def get_article(url: str) -> str:
     return text
 
 
-async def get_document_hrefs(url: str) -> list[str]:
+async def get_document_hrefs(url: str) -> list[str]:  # Rename
     document = await get_document(url)
     soup = bs4.BeautifulSoup(document, "html.parser")
     return [tag['href'] for tag in soup.select("table td font a")]  # type: ignore
 
 
-async def parse_document(url: str, output_dir: Path) -> None:
+async def parse_document(url: str, output_dir: Path) -> None:  # Should this be called main?
     links = await get_document_hrefs(url)
-    links = [link for link in links if isinstance(link, str)]
+    links = [link for link in links if isinstance(link, str)]  # TODO: What's this?
 
-    links = [f"http://paulgraham.com/{link}" for link in links if not link.startswith("http")]
-    print(f"Found {len(links)} links: {links}")
+    links = [f"http://paulgraham.com/{link}" for link in links if
+             not link.startswith("http")]  # What if the link does start with http?
+    print(f"Found {len(links)} links: {links}")  # Do we want to print this, like this?
 
     articles = await asyncio.gather(*[get_article(link) for link in links])
-    articles = [article for article in articles if isinstance(article, str)]
+    articles = [article for article in articles if isinstance(article, str)]  # Why isinstance?
 
     # Save JSON with all articles
-    with open(output_dir / "articles.json", 'w') as f:
+    with open(output_dir / "articles.json", 'w') as f:  # Use Pandas?
         json.dump(articles, f)
 
 
