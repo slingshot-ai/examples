@@ -1,27 +1,28 @@
-import json
 import os
 from pathlib import Path
+from typing import Tuple
 
 import torch
 import torch.backends.cudnn as cudnn
 import torch.nn.functional as F
 import torchvision
 import wandb
-from config import Config
-from dataset import FaceDataset
 from torch import nn
 from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+from config import Config
+from dataset import FaceDataset
+
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
-def train(train_loader: DataLoader, model: nn.Module, criterion: nn.Module, optimizer: nn.Module) -> float:
+def train(train_loader: DataLoader, model: nn.Module, criterion: nn.Module, optimizer: nn.Module) -> tuple[float, float]:
     """Perform one epoch's training"""
     model.train()
-    total_loss = 0
-    train_acc = 0
+    total_loss = 0.0
+    train_acc = 0.0
     num_examples = 0
 
     # train_loader using tqdm
@@ -89,9 +90,9 @@ def validate(validate_loader: DataLoader, model: nn.Module) -> float:
 
 def main(config_train: Config):
     if DEVICE == "cuda":
-        cudnn.benchmark = True
+        cudnn.benchmark = True  # TODO: What's this?
 
-    start_epoch = 0
+    start_epoch = 0  # ??
 
     # Get Model ready
     model = torchvision.models.resnet18(weights='IMAGENET1K_V1')
@@ -100,7 +101,6 @@ def main(config_train: Config):
 
     # Setting up Wandb
     wandb.init(
-        project="face-age-estimation-training",
         config={
             "optimizer": config_train.optimizer,
             "learning rate": config_train.learning_rate,
@@ -187,7 +187,7 @@ def main(config_train: Config):
             checkpoint_dir_path = os.path.join(config_train.checkpoint, checkpoint_name)
             print(f"Saving best checkpoint to {checkpoint_dir_path}")
 
-            torch.save(
+            torch.save(  # TODO: Save to separate files
                 {'epoch': epoch + 1, 'state_dict': model.state_dict(), 'optimizer_state_dict': optimizer.state_dict()},
                 checkpoint_dir_path,
             )
@@ -200,7 +200,6 @@ def main(config_train: Config):
 
 
 if __name__ == '__main__':
-    config_train = json.loads(os.environ.get("CONFIG", "{}"))
-    config_train = Config.parse_obj(config_train)
+    config_train = Config.model_validate_json(os.environ.get("CONFIG", "{}"))
 
     main(config_train)
