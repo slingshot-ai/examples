@@ -14,22 +14,19 @@ a more specialized and useful tool.
 ## Project setup
 
 1. Clone this repo
-2. In your project directory, create a new Slingshot project and link it using:
+2. In your project directory, initialize a new Slingshot project:
 
 ```bash
-$ slingshot login
 $ slingshot init
 ```
 
-Create a new project when prompted, add a project name, do not reinitialize the project from scratch, then apply your
-changes.
+Create a new project when prompted.
 
 Finally, run `slingshot push` to push local files to your Slingshot project
 
 ## Download Graham's essays
 
-First thing we need to do is download all of Graham's essays. This will be the dataset against which we'll be able to
-ask questions.
+First, let's prepare our retrieval dataset. For this use case, we'll scrape Paul Graham's essays from his blog.
 
 To do this simply go to the Runs page and start the Run called `download-essays`. It'll create a new artifact containing
 the raw text of all of Graham's essays.
