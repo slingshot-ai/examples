@@ -1,0 +1,115 @@
+---
+environments:
+  run-env:
+    python_version: '3.10'
+    python_packages:
+      - accelerate>=0.22.0
+      - bitsandbytes
+      - datasets
+      - diffusers
+      - fastapi
+      - numpy
+      - pydantic
+      - pillow
+      - scipy
+      - slingshot-ai>=0.0.19rc7
+      - tqdm
+      - transformers
+      - torch
+      - torchvision
+      - uvicorn
+      - wandb
+      - xformers
+  web-ui:
+    python_version: '3.10'
+    python_packages:
+      - fastapi
+      - gradio
+      - pillow
+      - slingshot-ai>=0.0.19rc7
+      - tqdm
+      - uvicorn
+  deployment-env:
+    python_version: '3.10'
+    python_packages:
+      - accelerate
+      - bitsandbytes
+      - diffusers
+      - fastapi
+      - numpy
+      - pydantic
+      - pillow
+      - scipy
+      - slingshot-ai>=0.0.19rc7
+      - tqdm
+      - transformers
+      - torch
+      - torchvision
+      - uvicorn
+      - xformers
+  download-env:
+    apt_packages:
+      - subversion
+runs:
+  - name: train-dreambooth
+    environment: run-env
+    machine_type: T4
+    num_gpu: 1
+    config_variables:
+      base_model_name_or_path: runwayml/stable-diffusion-v1-5
+      target_entity_image_dir: /mnt/images
+      generic_entity_image_dir: /mnt/generic_images
+      target_prompt: A photo of sks person
+      generic_prompt: A photo of a person
+      checkpoint_dir: /mnt/checkpoints
+      train_text_encoder: true
+      train_unet: true
+      max_train_steps: 1200
+      save_n_steps: 200
+      eval_n_steps: 100
+      eval_n_generate_samples: 9
+      learning_rate: 3e-6
+      gradient_accumulation_steps: 1
+    mounts:
+      - mode: UPLOAD
+        path: /mnt/checkpoints
+        target:
+          name: trained-model
+      - mode: DOWNLOAD
+        path: /mnt/images
+        selector:
+          name: source-images
+      - mode: DOWNLOAD
+        path: /mnt/generic_images
+        selector:
+          name: generic-images
+    cmd: accelerate launch entrypoints/train.py
+  - name: download-generic-images
+    environment: download-env
+    machine_type: CPU_SMALL
+    mounts:
+      - mode: UPLOAD
+        path: /mnt/generic_images
+        target:
+          name: generic-images
+    cmd: ./entrypoints/download_generic_images.sh a_photo_of_a_person /mnt/generic_images
+apps:
+  - name: demo
+    environment: web-ui
+    machine_type: CPU_TINY
+    using: webapp
+    port: 7860
+    cmd: gradio entrypoints/gradio_app.py
+deployments:
+  - name: image-generation
+    environment: deployment-env
+    machine_type: T4
+    num_gpu: 1
+    config_variables:
+      checkpoints_path: /mnt/model
+    mounts:
+      - mode: DOWNLOAD
+        path: /mnt/model
+        selector:
+          name: trained-model
+    cmd: python entrypoints/inference.py
