@@ -1,0 +1,67 @@
+---
+environments:
+  training-environment:
+    python_packages:
+      - torch
+      - torchvision
+      - tqdm
+      - wandb
+      - pydantic
+      - lightning
+      - pandas
+      - slingshot-ai>=0.0.19rc6
+  deployment-environment:
+    python_packages:
+      - uvicorn
+      - fastapi
+      - transformers
+      - torch
+      - torchvision
+      - pillow
+      - timm
+      - pydantic
+      - slingshot-ai>=0.0.19rc6
+  gradio-env:
+    python_packages:
+      - gradio
+      - fastapi
+      - uvicorn
+      - pillow
+      - pydantic
+      - slingshot-ai>=0.0.19rc6
+apps:
+  - name: front-end-ui
+    machine_type: CPU_SMALL
+    config_variables:
+      deployment_name: age-prediction-deployment
+    using: webapp
+    port: 8080
+    cmd: uvicorn gradio_app:app --port 8080 --host 0.0.0.0
+    environment: gradio-env
+runs:
+  - name: train-model
+    machine_type: T4
+    mounts:
+      - mode: DOWNLOAD
+        path: /mnt/dataset
+        selector:
+          name: appa-real-dataset
+          tag: latest
+      - mode: UPLOAD
+        path: /mnt/model
+        target:
+          name: age-prediction-model
+          tag: latest
+    cmd: python train.py
+    environment: training-environment
+deployments:
+  - name: age-prediction-deployment
+    machine_type: T4
+    mounts:
+      - mode: DOWNLOAD
+        path: /mnt/face-age-prediction-model
+        selector:
+          name: age-prediction-model
+          tag: latest
+    cmd: python inference.py
+    environment: deployment-environment
