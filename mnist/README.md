@@ -5,11 +5,11 @@ recognises digits in the form of images.
 
 ## Project Setup
 
-0. Clone the repository locally via github.
+1. Clone the repository locally via github.
 
-0. `cd` into your newly created `example-mnist` directory.
+2. `cd` into your newly created `example-mnist` directory.
 
-0. Connect your local copy to a slingshot project you own:
+3. Connect your local copy to a slingshot project you own:
    * If you already have an empty project for this, you should `slingshot use` and select it:
       ```bash
       $ slingshot use
@@ -22,7 +22,7 @@ recognises digits in the form of images.
    * Otherwise, instead use `slingshot init` which will guide you to link the folder to a new project.
      (If it asks about initializing a project from scratch, enter `y` to confirm)
 
-0. Push the source code to your project and apply the `slingshot.yaml`:
+4. Push the source code to your project and apply the `slingshot.yaml`:
     ```bash
     $ slingshot push
 
@@ -51,7 +51,7 @@ That's it! Your project is set up and ready to use.
 
 ## Usage
 
-0. Start a run to create an artifact of the MNIST dataset to be used as the training data:
+1. Start a run to create an artifact of the MNIST dataset to be used as the training data:
     ```bash
     $ slingshot run start
 
@@ -63,7 +63,7 @@ That's it! Your project is set up and ready to use.
     Run created with name 'royal-squirrel-1', view in browser at https://app.slingshot.xyz/project/mnist-example/runs/...
     ```
 
-0. Once the dataset run has completed, start a run to train the classifier model:
+2. Once the dataset run has completed, start a run to train the classifier model:
     ```bash
     $ slingshot run start
 
@@ -75,7 +75,7 @@ That's it! Your project is set up and ready to use.
     Run created with name 'youthful-lobster-2', view in browser at https://app.slingshot.xyz/project/mnist-example/runs/...
     ```
 
-0. When training is completed, you can deploy the model for inference:
+3. When training is completed, you can deploy the model for inference:
     ```bash
     $ slingshot inference start
 
@@ -84,7 +84,7 @@ That's it! Your project is set up and ready to use.
     https://app.slingshot.xyz/project/mnist-example/deployments/...
     ```
 
-0. Once your model is deployed, you can make predictions by running:
+4. Once your model is deployed, you can make predictions by running:
     ```bash
     $ slingshot inference predict test_img.jpg
 
