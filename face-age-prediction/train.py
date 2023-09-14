@@ -8,6 +8,7 @@ from dataset import FaceDataset
 from lightning.pytorch.loggers import WandbLogger
 from model import FaceAgeTrainer
 from pydantic import BaseModel
+from slingshot.sdk.utils import get_config
 from torch.utils.data import DataLoader
 
 
@@ -38,7 +39,7 @@ def load_dataset(
 
 
 if __name__ == "__main__":
-    config_train = TrainConfig.model_validate_json(os.environ.get("CONFIG", "{}"))
+    config_train = get_config(TrainConfig)
     print(f"Config: {config_train.model_dump_json(indent=2)}")
 
     # Create model
