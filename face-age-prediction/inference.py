@@ -16,7 +16,6 @@ from slingshot.sdk.utils import get_config
 class DeployConfig(BaseModel):
     # Age prediction model
     checkpoint_path: Path = Path("/mnt/face-age-prediction-model/model.ckpt")
-    num_age_classes: int = 101
     img_size: int = 224
 
 
