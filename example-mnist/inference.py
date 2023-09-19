@@ -2,7 +2,7 @@ from pathlib import Path
 
 import torch
 
-from slingshot import InferenceModel, Prediction
+from slingshot.inference import InferenceModel, Prediction
 
 from model import DigitRecognizer
 from utils import bytes_to_tensor
