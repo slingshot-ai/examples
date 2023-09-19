@@ -1,5 +1,5 @@
 environments:
-  training-env:
+  ml-env:
     python_packages:
       - torch
       - pytorch-lightning
@@ -7,81 +7,63 @@ environments:
       - Pillow
       - torchvision
       - pydantic
-  inference-env:
-    python_packages:
-      - torch
-      - pytorch-lightning
-      - torchvision
-      - pillow
-      - numpy
       - slingshot-ai
-    apt_packages: []
+      - jupyterlab>=4.0.0
   app-env:
-    python_version: '3.10'
     python_packages:
       - gradio
       - uvicorn
       - fastapi
       - slingshot-ai
       - pillow
-    apt_packages: []
-  session-env:
-    python_packages:
-      - jupyterlab>=3.5.0
-      - torch
-      - pytorch-lightning
-      - torchvision
-      - pillow
-      - numpy
-      - slingshot-ai
 runs:
   - name: create-dataset-artifact
-    environment: training-env
+    environment: ml-env
     machine_type: CPU_SMALL
-    num_gpu: 0
-    config_variables: {}
     mounts:
       - mode: UPLOAD
         path: /mnt/output
-        tag: mnist-dataset
-    attach_project_credentials: false
+        target:
+          name: mnist-dataset
     cmd: python data.py
   - name: train-model
-    environment: training-env
+    environment: ml-env
     machine_type: CPU_SMALL
-    num_gpu: 0
-    config_variables: {}
     mounts:
       - mode: DOWNLOAD
         path: /mnt/dataset
-        tag: mnist-dataset
+        selector:
+          name: mnist-dataset
       - mode: UPLOAD
         path: /mnt/output
-        tag: mnist-model
-    attach_project_credentials: false
+        target:
+          name: mnist-model
     cmd: python train.py
 deployments:
   - name: classifier-deployment
-    environment: inference-env
-    machine_size: SMALL
+    environment: ml-env
+    machine_type: CPU_SMALL
     mounts:
       - path: /mnt/model
         mode: DOWNLOAD
-        tag: mnist-model
+        selector:
+          name: mnist-model
     cmd: python inference.py
-    attach_project_credentials: false
 apps:
   - name: draw-mnist
     environment: app-env
-    machine_size: SMALL
-    config_variables: {}
-    mounts: []
-    service_account: false
+    machine_type: CPU_SMALL
     port: 8080
     cmd: uvicorn app:app --port 8080 --host 0.0.0.0
+    using: webapp
     attach_project_credentials: true
   - name: session
-    environment: session-env
-    machine_size: CPU_LARGE
+    environment: ml-env
+    machine_type: CPU_LARGE
     using: session
     attach_project_credentials: true
+    mounts:
+      - mode: DOWNLOAD
+        path: /mnt/dataset
+        selector:
+          name: mnist-dataset

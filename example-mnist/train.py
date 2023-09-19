@@ -5,11 +5,10 @@ from typing import Literal
 import pytorch_lightning as pl
 import torch
 import torchvision
-
 from pydantic import BaseModel
+from torch.utils.data import DataLoader
+
 from model import DigitRecognizer
-from torch import nn
-from torch.utils.data import DataLoader, Dataset
 
 DATASET_PATH = Path("/mnt/dataset")
 MODEL_DIR_PATH = Path("/mnt/output")
