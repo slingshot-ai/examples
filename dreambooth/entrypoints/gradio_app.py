@@ -7,6 +7,8 @@ import gradio as gr
 from PIL import Image
 from slingshot.sdk import SlingshotSDK
 
+from dreambooth.sample_prompts import SAMPLE_PROMPTS
+
 DEPLOYMENT_NAME = "image-generation"
 
 sdk = SlingshotSDK()
@@ -51,11 +53,6 @@ async def get_model_choices():
     return gr.Dropdown.update(choices=checkpoint_choices)
 
 
-def example_prompts() -> list[str]:
-    with open("prompts.txt", "r") as f:
-        return f.read().splitlines()
-
-
 with gr.Blocks() as demo:
     with gr.Column():
         with gr.Row():
@@ -63,7 +60,7 @@ with gr.Blocks() as demo:
         with gr.Row():
             with gr.Column():
                 checkpoint = gr.Dropdown(choices=[], label="Model")  # choices populated in demo.load()
-                prompt = gr.Dropdown(choices=example_prompts(), allow_custom_value=True, label="Prompt")
+                prompt = gr.Dropdown(choices=SAMPLE_PROMPTS, allow_custom_value=True, label="Prompt")
                 num_inference_steps = gr.Slider(1, 200, value=50, step=1, label="Num inference steps")
                 num_samples = gr.Slider(1, 8, value=1, step=1, label="Num samples")
                 guidance_scale = gr.Slider(0, 20, value=7.5, label="Guidance scale")

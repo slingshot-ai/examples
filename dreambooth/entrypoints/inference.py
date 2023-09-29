@@ -6,7 +6,7 @@ from io import BytesIO
 import torch
 from diffusers import DDIMScheduler, StableDiffusionPipeline, UNet2DConditionModel
 from PIL import Image
-from slingshot import InferenceModel
+from slingshot.inference import InferenceModel
 from slingshot.sdk.utils import get_config
 from transformers import CLIPTextModel
 

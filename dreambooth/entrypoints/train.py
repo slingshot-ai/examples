@@ -1,4 +1,5 @@
 # Code modified from "https://github.com/huggingface/diffusers/blob/main/examples/dreambooth/train_dreambooth.py"
+import itertools
 from contextlib import nullcontext
 
 import bitsandbytes as bnb
@@ -16,7 +17,8 @@ from transformers import CLIPTextModel, CLIPTokenizer
 
 from dreambooth.config import TrainConfig
 from dreambooth.dataset import get_entity_loader
-from dreambooth.utils import tile_images, setup_logging
+from dreambooth.utils import setup_logging
+from dreambooth.sample_prompts import SAMPLE_PROMPTS
 
 
 def main():
@@ -125,8 +127,8 @@ def main():
 
                 if global_step % config.eval_n_steps == 0:
                     logger.info("Generating samples at step %d", global_step)
-                    image = generate_samples(vae, text_encoder, tokenizer, unet, noise_scheduler, config, accelerator)
-                    accelerator.log({"image": image}, step=global_step)
+                    images = generate_samples(vae, text_encoder, tokenizer, unet, noise_scheduler, config, accelerator)
+                    accelerator.log({"samples": images}, step=global_step)
 
         accelerator.wait_for_everyone()
 
@@ -212,8 +214,8 @@ def generate_samples(
     noise_scheduler: DDPMScheduler,
     config: TrainConfig,
     accelerator: Accelerator,
-) -> wandb.Image:
-    """Generate samples from the fine-tuned models, tiled as a single image."""
+) -> list[wandb.Image]:
+    """Generate samples from the fine-tuned models"""
     pipeline = StableDiffusionPipeline.from_pretrained(
         config.base_model_name_or_path,
         vae=vae,
@@ -228,18 +230,19 @@ def generate_samples(
     )
     pipeline.set_progress_bar_config(disable=True)
 
+    prompts = itertools.cycle(SAMPLE_PROMPTS if config.eval_use_dreambooth_prompts else [config.target_prompt])
+
     images = []
     for _ in range(config.eval_n_generate_samples):  # using batch size 1 to prevent OOM on T4
+        prompt = next(prompts)
         with accelerator.autocast():
             output: StableDiffusionPipelineOutput = pipeline(
-                prompt=config.target_prompt, num_inference_steps=config.eval_num_inference_steps, output_type="np"
+                prompt=prompt, num_inference_steps=config.eval_num_inference_steps, output_type="np"
             )
-        images.append(output.images[0])
+        [image] = pipeline.numpy_to_pil(output.images[0])
+        images.append(wandb.Image(image, caption=prompt))
 
-    image = tile_images(images)
-    image = pipeline.numpy_to_pil(image)[0]
-
-    return wandb.Image(image, caption=config.target_prompt)
+    return images
 
 
 if __name__ == "__main__":
