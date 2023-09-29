@@ -5,7 +5,6 @@ from typing import Literal
 
 import torch
 from pydantic import BaseModel
-from torchvision.transforms import CenterCrop, Compose, InterpolationMode, Normalize, RandomCrop, Resize, ToTensor
 
 
 class TrainConfig(BaseModel):
@@ -14,7 +13,7 @@ class TrainConfig(BaseModel):
     generic_entity_image_dir: Path | None = None  # If None, the prior preservation loss is not used.
     target_prompt: str = "A photo of sks person"  # Prompt for the target entity
     generic_prompt: str = "A photo of a person"  # Prompt for the generic entities
-    image_extensions: str = ".jpg,.jpeg,.png"  # Comma-separated list of image extensions to look for. TODO: use list once slingshot supports it
+    image_extensions: str = ".jpg,.jpeg,.png,.heic"  # Comma-separated list of image extensions to look for. TODO: use list once slingshot supports it
     # --- Image preprocessing ---
     resolution: int = 512
     center_crop: bool = False
@@ -39,7 +38,8 @@ class TrainConfig(BaseModel):
     save_n_steps: int = 200
     eval_n_steps: int = 100
     eval_n_generate_samples: int = 9
-    eval_num_inference_steps: int = 20
+    eval_num_inference_steps: int = 25
+    eval_use_dreambooth_prompts: bool = True
     # --- Others ---
     seed: int = 0
     wandb_project: str = "dreambooth"
