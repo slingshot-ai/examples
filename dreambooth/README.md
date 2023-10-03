@@ -5,9 +5,9 @@
 |------------------------|------------------------|------------------------|
 | ![Demo image 1][demo1] | ![Demo image 2][demo2] | ![Demo image 3][demo3] |
 
-[demo1]: https://github.com/slingshot-ai/slingshot-experimental/assets/66584117/516ab353-65db-4b25-a782-762d7da1db8e
-[demo2]: https://github.com/slingshot-ai/slingshot-experimental/assets/66584117/3497d267-2bf1-49d7-9347-b84c658ed395
-[demo3]: https://github.com/slingshot-ai/slingshot-experimental/assets/66584117/015224f6-c1be-4435-935b-14368e20567d
+[demo1]: img/img1.png
+[demo2]: img/img2.png
+[demo3]: img/img3.png
 
 There are several text-to-image models like Stable Diffusion and Imagen available that allow you to produce images of
 objects or fictional characters in completely novel settings. It is as simple as asking the model to generate an image
@@ -219,9 +219,8 @@ which will give you a link to the app and you can start generating new images!
 
 Finally, here's Darth Vader giving me some cookies!
 
-[demo4]: https://github.com/slingshot-ai/slingshot-experimental/assets/66584117/cd4b2076-03d1-404d-bf8b-78aa1260042c
-[demo5]: https://github.com/slingshot-ai/slingshot-experimental/assets/66584117/351840ed-b6be-4872-9ecb-1901f9a2ec9c
-
+[demo4]: img/img4.png
+[demo5]: img/img5.png
 | 1                      | 2                      |
 |------------------------|------------------------|
 | ![Demo image 4][demo4] | ![Demo image 5][demo5] |

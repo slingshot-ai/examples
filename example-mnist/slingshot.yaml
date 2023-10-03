@@ -9,12 +9,13 @@ environments:
       - pydantic
       - slingshot-ai
       - jupyterlab>=4.0.0
+      - jupyter_collaboration
   app-env:
     python_packages:
       - gradio
       - uvicorn
       - fastapi
-      - slingshot-ai
+      - slingshot-ai==0.0.20
       - pillow
 runs:
   - name: create-dataset-artifact
