@@ -5,9 +5,9 @@
 |------------------------|------------------------|------------------------|
 | ![Demo image 1][demo1] | ![Demo image 2][demo2] | ![Demo image 3][demo3] |
 
-[demo1]: img/img1.png
-[demo2]: img/img2.png
-[demo3]: img/img3.png
+[demo1]: ../img/img1.png
+[demo2]: ../img/img2.png
+[demo3]: ../img/img3.png
 
 There are several text-to-image models like Stable Diffusion and Imagen available that allow you to produce images of
 objects or fictional characters in completely novel settings. It is as simple as asking the model to generate an image
@@ -223,5 +223,5 @@ Finally, here's Darth Vader giving me some cookies!
 |------------------------|------------------------|
 | ![Demo image 4][demo4] | ![Demo image 5][demo5] |
 
-[demo4]: img/img4.png
-[demo5]: img/img5.png
+[demo4]: ../img/img4.png
+[demo5]: ../img/img5.png
