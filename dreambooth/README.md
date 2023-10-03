@@ -222,5 +222,6 @@ Finally, here's Darth Vader giving me some cookies!
 | 1                      | 2                      |
 |------------------------|------------------------|
 | ![Demo image 4][demo4] | ![Demo image 5][demo5] |
+
 [demo4]: img/img4.png
 [demo5]: img/img5.png
