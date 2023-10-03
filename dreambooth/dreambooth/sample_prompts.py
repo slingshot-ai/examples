@@ -8,4 +8,5 @@ SAMPLE_PROMPTS = [
     "closeup portrait of sks person viking, heavy snow, highly detailed, science fiction, artistic, intricate details, bright colors, unreal engine, digital painting",
     "closeup portrait of sks person by Andy Warhol, digital painting, high contrast, artistic masterpiece, bright colors",
     "artistic closeup portrait of sks person, intricate details, digital painting, cave painting style, masterpiece, subtly engraved, monotone",
+    "Portrait of sks person in the style of Gustav Klimt's Portrait of Adele Bloch-Bauer I",
 ]
