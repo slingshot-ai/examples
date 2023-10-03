@@ -219,8 +219,9 @@ which will give you a link to the app and you can start generating new images!
 
 Finally, here's Darth Vader giving me some cookies!
 
-[demo4]: img/img4.png
-[demo5]: img/img5.png
 | 1                      | 2                      |
 |------------------------|------------------------|
 | ![Demo image 4][demo4] | ![Demo image 5][demo5] |
+
+[demo4]: img/img4.png
+[demo5]: img/img5.png
