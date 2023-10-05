@@ -1,5 +1,6 @@
 # Code modified from "https://github.com/huggingface/diffusers/blob/main/examples/dreambooth/train_dreambooth.py"
 import itertools
+import os
 from contextlib import nullcontext
 
 import bitsandbytes as bnb
@@ -23,6 +24,8 @@ from dreambooth.sample_prompts import SAMPLE_PROMPTS
 
 def main():
     config = get_config(TrainConfig)
+    # Check if wandb env var is configured, if not, disable logging
+    use_wandb = os.environ.get("WANDB_API_KEY") is not None
 
     # --- Accelerator and logging setup ---
     config.logging_dir.parent.mkdir(parents=True, exist_ok=True)
@@ -30,14 +33,14 @@ def main():
         gradient_accumulation_steps=config.gradient_accumulation_steps,
         mixed_precision=config.mixed_precision,
         project_dir=config.logging_dir,
-        log_with="wandb",
+        log_with="wandb" if use_wandb else None,
     )
     set_seed(config.seed)
     if accelerator.is_main_process:
         accelerator.init_trackers(
             project_name=config.wandb_project,
             config=config.model_dump(),
-            init_kwargs={"wandb": {"mode": "online" if not config.dry_run else "disabled"}},
+            init_kwargs={"wandb": {"mode": "online" if not config.dry_run and use_wandb else "disabled"}},
         )
 
     setup_logging()
@@ -116,16 +119,18 @@ def main():
             optimizer.zero_grad()
 
         # --- Logging, saving, and evaluation ---
-        accelerator.log({"loss": total_loss.item(), "lr": lr_scheduler.get_last_lr()[0]}, step=global_step + 1)
+        if use_wandb:
+            accelerator.log({"loss": total_loss.item(), "lr": lr_scheduler.get_last_lr()[0]}, step=global_step + 1)
+
         if accelerator.sync_gradients:  # made a gradient step
             global_step += 1
 
             if accelerator.is_main_process:
-                if global_step % config.save_n_steps == 0:
+                if config.save_all_checkpoints and (global_step % config.save_n_steps == 0):
                     logger.info("Step %d: Saving model", global_step)
                     save_model(config, text_encoder, unet, global_step, accelerator)
 
-                if global_step % config.eval_n_steps == 0:
+                if use_wandb and global_step % config.eval_n_steps == 0:
                     logger.info("Generating samples at step %d", global_step)
                     images = generate_samples(vae, text_encoder, tokenizer, unet, noise_scheduler, config, accelerator)
                     accelerator.log({"samples": images}, step=global_step)

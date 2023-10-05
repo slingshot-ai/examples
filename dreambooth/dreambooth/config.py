@@ -35,6 +35,7 @@ class TrainConfig(BaseModel):
     use_8bit_adam: bool = True
     # --- Evaluation & saving ---
     checkpoint_dir: Path
+    save_all_checkpoints: bool = False
     save_n_steps: int = 200
     eval_n_steps: int = 100
     eval_n_generate_samples: int = 9
