@@ -11,7 +11,8 @@ from torch.utils.data import DataLoader
 from model import DigitRecognizer
 
 DATASET_PATH = Path("/mnt/dataset")
-MODEL_DIR_PATH = Path("/mnt/output")
+MODEL_LOGS_PATH = Path("/mnt/output")
+MODEL_DIR_PATH = Path("/mnt/model")
 
 
 class TrainConfig(BaseModel):
@@ -45,7 +46,7 @@ if __name__ == "__main__":
 
     # Train model
     print("Training model...")
-    trainer = pl.Trainer(default_root_dir=MODEL_DIR_PATH, accelerator=device, devices=1, max_epochs=configs.num_epochs)
+    trainer = pl.Trainer(default_root_dir=MODEL_LOGS_PATH, accelerator=device, devices=1, max_epochs=configs.num_epochs)
     trainer.fit(model=digit_recognizer, train_dataloaders=train_dataloader)
     # Save the model
     print("Saving model...")

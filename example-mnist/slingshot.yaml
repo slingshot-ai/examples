@@ -38,6 +38,10 @@ runs:
       - mode: UPLOAD
         path: /mnt/output
         target:
+          name: mnist-logs
+      - mode: UPLOAD
+        path: /mnt/model
+        target:
           name: mnist-model
     cmd: python train.py
 deployments:
